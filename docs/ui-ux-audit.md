@@ -125,11 +125,13 @@ referensi tidak terpotong default 10.
 
 ### P2 — polish
 
-- ⬜ U-09 aksi cepat pelunasan (validasi nominal sudah inline).
-- ⬜ U-10 validasi filter laporan.
-- ⬜ U-11 guard unsaved changes.
-- ⬜ F-09 sentralisasi konstanta domain.
-- ⬜ (Tambahan) skeleton loading untuk list, bukan spinner penuh.
+| Item | Status | Bukti |
+| --- | --- | --- |
+| U-09 aksi cepat pelunasan | ✅ Selesai | `/orders/$id/payment`: tombol “Lunasi semua” mengisi sisa tagihan + validasi nominal tetap inline |
+| U-10 validasi filter laporan | ✅ Selesai | `/reports`: rentang terbalik ditolak inline (`aria-invalid`), query tidak dijalankan, empty state menjelaskan |
+| U-11 guard unsaved changes | ✅ Selesai | `UnsavedChangesGuard` (Router blocker + `beforeunload`) di form produk, varian, pelanggan, tenant, outlet, dan pengaturan struk; `allowNextNavigation()` melewatkan redirect setelah simpan |
+| F-09 sentralisasi konstanta domain | ✅ Selesai | `src/lib/constants.ts`: payment methods, outlet roles, paper sizes, movement types, label & tone status pesanan/pembayaran (+ unit test) |
+| Skeleton loading list | ✅ Selesai | `ListSkeleton` dipakai list Produk, Pelanggan, dan Pesanan |
 
 ---
 
