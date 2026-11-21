@@ -9,6 +9,7 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 export function OutletEditPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
     address: '',
     default_connection_mode: 'online' as 'online' | 'offline',
   });
+  const [errors, setErrors] = useState<{ name?: string; address?: string }>({});
 
   useEffect(() => {
     if (!outlet) return;
@@ -59,8 +61,12 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
   }
 
   const handleSubmit = async () => {
-    if (!form.name.trim() || !form.address.trim()) {
-      addToast({ variant: 'error', title: 'Data belum lengkap', message: 'Nama dan alamat outlet wajib diisi.' });
+    const next: { name?: string; address?: string } = {};
+    if (form.name.trim().length < 3) next.name = 'Nama outlet minimal 3 karakter.';
+    if (!form.address.trim()) next.address = 'Alamat outlet wajib diisi.';
+    setErrors(next);
+    if (Object.keys(next).length > 0) {
+      document.getElementById(next.name ? 'outlet-name' : 'outlet-address')?.focus();
       return;
     }
     try {
@@ -106,7 +112,10 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
               value={form.name}
               onChange={(event) => setForm({ ...form, name: event.target.value })}
               className="mt-1"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'outlet-name-error' : undefined}
             />
+            <FieldError id="outlet-name-error" message={errors.name} />
           </div>
           <div>
             <Label htmlFor="outlet-address">Alamat</Label>
@@ -115,7 +124,10 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
               value={form.address}
               onChange={(event) => setForm({ ...form, address: event.target.value })}
               className="mt-1"
+              aria-invalid={!!errors.address}
+              aria-describedby={errors.address ? 'outlet-address-error' : undefined}
             />
+            <FieldError id="outlet-address-error" message={errors.address} />
           </div>
           <div>
             <Label htmlFor="outlet-mode">Mode Koneksi Bawaan</Label>

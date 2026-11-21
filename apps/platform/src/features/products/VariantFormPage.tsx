@@ -8,6 +8,7 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 const EMPTY_FORM = { name: '', sku: '', barcode: '', price_override: '', stock_qty: '0' };
 
@@ -26,6 +27,7 @@ export function VariantFormPage({
   const createVariant = useCreateVariant(productId);
   const updateVariant = useUpdateVariant(productId);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState<{ name?: string; sku?: string; stock_qty?: string }>({});
 
   const variant = variantId ? variants.find((item) => item.id === variantId) : undefined;
 
@@ -88,8 +90,14 @@ export function VariantFormPage({
   }
 
   const handleSubmit = async () => {
-    if (!form.name || !form.sku) {
-      addToast({ variant: 'error', title: 'Data belum lengkap', message: 'Nama dan SKU varian wajib diisi.' });
+    const next: { name?: string; sku?: string; stock_qty?: string } = {};
+    if (!form.name.trim()) next.name = 'Nama varian wajib diisi.';
+    if (!form.sku.trim()) next.sku = 'SKU varian wajib diisi.';
+    if (Number(form.stock_qty) < 0) next.stock_qty = 'Stok tidak boleh negatif.';
+    setErrors(next);
+    if (Object.keys(next).length > 0) {
+      const first = Object.keys(next)[0];
+      document.getElementById(`variant-${first === 'stock_qty' ? 'stock' : first}`)?.focus();
       return;
     }
     const payload = {
@@ -144,7 +152,10 @@ export function VariantFormPage({
               value={form.name}
               onChange={(event) => setForm({ ...form, name: event.target.value })}
               className="mt-1"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'variant-name-error' : undefined}
             />
+            <FieldError id="variant-name-error" message={errors.name} />
           </div>
           <div>
             <Label htmlFor="variant-sku">SKU</Label>
@@ -153,7 +164,10 @@ export function VariantFormPage({
               value={form.sku}
               onChange={(event) => setForm({ ...form, sku: event.target.value })}
               className="mt-1"
+              aria-invalid={!!errors.sku}
+              aria-describedby={errors.sku ? 'variant-sku-error' : undefined}
             />
+            <FieldError id="variant-sku-error" message={errors.sku} />
           </div>
           <div>
             <Label htmlFor="variant-barcode">Barcode</Label>
@@ -184,7 +198,10 @@ export function VariantFormPage({
               value={form.stock_qty}
               onChange={(event) => setForm({ ...form, stock_qty: event.target.value })}
               className="mt-1"
+              aria-invalid={!!errors.stock_qty}
+              aria-describedby={errors.stock_qty ? 'variant-stock-error' : undefined}
             />
+            <FieldError id="variant-stock-error" message={errors.stock_qty} />
           </div>
         </div>
 

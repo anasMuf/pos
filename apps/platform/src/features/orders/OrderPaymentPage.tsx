@@ -10,6 +10,7 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 import { formatCurrency, formatDateTime, newClientId } from '../../lib/format';
 
 export function OrderPaymentPage({ orderId }: { orderId: number }) {
@@ -22,6 +23,7 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PaymentMethod>('cash');
   const [note, setNote] = useState('');
+  const [error, setError] = useState('');
   const openShift = shifts.find((shift) => shift.status === 'open');
 
   useEffect(() => {
@@ -61,9 +63,16 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
   const handleSubmit = async () => {
     const value = Number(amount);
     if (!value || value <= 0) {
-      addToast({ variant: 'error', title: 'Nominal tidak valid', message: 'Masukkan nominal pembayaran.' });
+      setError('Nominal pembayaran harus lebih dari 0.');
+      document.getElementById('payment-amount')?.focus();
       return;
     }
+    if (value > remaining) {
+      setError(`Nominal melebihi sisa tagihan (${formatCurrency(remaining)}).`);
+      document.getElementById('payment-amount')?.focus();
+      return;
+    }
+    setError('');
     try {
       await addPayment.mutateAsync({
         id: orderId,
@@ -127,9 +136,15 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
                 type="number"
                 min={0}
                 value={amount}
-                onChange={(event) => setAmount(event.target.value)}
+                onChange={(event) => {
+                  setAmount(event.target.value);
+                  setError('');
+                }}
                 className="mt-1"
+                aria-invalid={!!error}
+                aria-describedby={error ? 'payment-amount-error' : undefined}
               />
+              <FieldError id="payment-amount-error" message={error} />
             </div>
             <div>
               <Label htmlFor="payment-method">Metode</Label>

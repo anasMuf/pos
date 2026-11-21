@@ -8,6 +8,7 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 const EMPTY_FORM = { name: '', phone: '', email: '', address: '', note: '' };
 
@@ -19,6 +20,7 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
   const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState<{ name?: string }>({});
 
   useEffect(() => {
     if (!customer) return;
@@ -60,9 +62,11 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
 
   const handleSubmit = async () => {
     if (!form.name.trim()) {
-      addToast({ variant: 'error', title: 'Nama wajib diisi', message: 'Masukkan nama pelanggan.' });
+      setErrors({ name: 'Nama pelanggan wajib diisi.' });
+      document.getElementById('customer-name')?.focus();
       return;
     }
+    setErrors({});
     if (!customerId && !activeOutletId) {
       addToast({ variant: 'error', title: 'Outlet belum dipilih', message: 'Pilih outlet terlebih dahulu.' });
       return;
@@ -109,9 +113,15 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
             <Input
               id="customer-name"
               value={form.name}
-              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, name: event.target.value });
+                setErrors({});
+              }}
               className="mt-1"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'customer-name-error' : undefined}
             />
+            <FieldError id="customer-name-error" message={errors.name} />
           </div>
           <div>
             <Label htmlFor="customer-phone">Telepon</Label>

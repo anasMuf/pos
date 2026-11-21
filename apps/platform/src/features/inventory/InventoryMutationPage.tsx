@@ -10,6 +10,7 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 const MANUAL_TYPES: { value: MovementType; label: string }[] = [
   { value: 'stock_in', label: 'Stok Masuk' },
@@ -29,6 +30,7 @@ export function InventoryMutationPage() {
   const [movementType, setMovementType] = useState<MovementType>('stock_in');
   const [qty, setQty] = useState('');
   const [note, setNote] = useState('');
+  const [errors, setErrors] = useState<{ product?: string; qty?: string }>({});
 
   const selectedProduct = products.find((product) => product.id === Number(productId));
   const { data: variants = [] } = useVariants(productId ? Number(productId) : null);
@@ -55,12 +57,17 @@ export function InventoryMutationPage() {
       return;
     }
     const parsedQty = Number(qty);
-    if (!productId || !parsedQty) {
-      addToast({ variant: 'error', title: 'Data belum lengkap', message: 'Pilih produk dan isi jumlah.' });
+    const next: { product?: string; qty?: string } = {};
+    if (!productId) next.product = 'Pilih produk terlebih dahulu.';
+    if (!parsedQty) next.qty = 'Jumlah mutasi wajib diisi.';
+    if (negativeStock) next.qty = 'Stok akhir tidak boleh negatif.';
+    setErrors(next);
+    if (next.product) {
+      document.getElementById('movement-product')?.focus();
       return;
     }
-    if (negativeStock) {
-      addToast({ variant: 'error', title: 'Stok tidak mencukupi', message: 'Stok akhir tidak boleh negatif.' });
+    if (next.qty) {
+      document.getElementById('movement-qty')?.focus();
       return;
     }
     const delta =
@@ -116,8 +123,11 @@ export function InventoryMutationPage() {
               onChange={(event) => {
                 setProductId(event.target.value);
                 setVariantId('');
+                setErrors({});
               }}
               className="mt-1"
+              aria-invalid={!!errors.product}
+              aria-describedby={errors.product ? 'movement-product-error' : undefined}
             >
               <option value="">Pilih produk</option>
               {products.map((product) => (
@@ -126,6 +136,7 @@ export function InventoryMutationPage() {
                 </option>
               ))}
             </Select>
+            <FieldError id="movement-product-error" message={errors.product} />
           </div>
           {variants.length > 0 && (
             <div>
@@ -168,9 +179,15 @@ export function InventoryMutationPage() {
               id="movement-qty"
               type="number"
               value={qty}
-              onChange={(event) => setQty(event.target.value)}
+              onChange={(event) => {
+                setQty(event.target.value);
+                setErrors({});
+              }}
               className="mt-1"
+              aria-invalid={!!errors.qty}
+              aria-describedby={errors.qty ? 'movement-qty-error' : undefined}
             />
+            <FieldError id="movement-qty-error" message={errors.qty} />
           </div>
           <div>
             <Label htmlFor="movement-note">Catatan</Label>
