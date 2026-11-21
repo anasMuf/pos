@@ -71,6 +71,8 @@ that can switch to offline and sync back idempotently.
   Pengecualian: `ItemConfigurator` dan `QuickCustomerModal` di POS (alur transaksi) serta `ReceiptModal` (preview).
 - Form wajib punya validasi inline per field (`FieldError` + `aria-invalid`) dan fokus ke field pertama
   yang gagal; toast hanya ringkasan. Halaman edit wajib punya not-found/error state, bukan form kosong.
+- Form tambah/edit yang punya state lokal wajib memakai `UnsavedChangesGuard` + baseline state, dan
+  memanggil `allowNextNavigation()` tepat sebelum `navigate(...)` setelah simpan berhasil.
 - Anggota outlet dipilih dari hasil `GET /api/users/search` (`useSearchUsers`), bukan input `user_id` mentah.
 - Preset capability hanya didefinisikan di `src/lib/capabilities.ts` (`CAPABILITY_PRESETS`); form create dan
   edit outlet sama-sama memakai preset + Reset.
@@ -83,6 +85,8 @@ that can switch to offline and sync back idempotently.
   Reference data needed in full (POS products/customers, outlet switcher) is fetched with `limit=100`.
   Use `apiGetPage` when you need the metadata; `apiGet` still unwraps `data` only.
 - Follow existing Tailwind + indigo palette and the compact card/list style.
+- Option lists and status labels live in `src/lib/constants.ts` (payment methods, outlet roles, paper
+  sizes, movement types, order/payment status labels & tones) — add new values there, not per page.
 - Feature code lives in `src/features/<feature>/`.
 - POS shortcuts: `F2` focuses search, `F9` checks out, `Esc` closes the item modal.
 - Reports support CSV export via `src/lib/csv.ts`.

@@ -9,6 +9,9 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
+
+const EMPTY_TENANT_FORM = { name: '', code: '', status: 'active' as 'active' | 'inactive' };
 
 export function TenantFormPage({ tenantId }: { tenantId?: number }) {
   const navigate = useNavigate();
@@ -17,13 +20,18 @@ export function TenantFormPage({ tenantId }: { tenantId?: number }) {
   const { data: tenant, isLoading, isError } = useTenant(tenantId ?? null);
   const createTenant = useCreateTenant();
   const updateTenant = useUpdateTenant();
-  const [form, setForm] = useState({ name: '', code: '', status: 'active' as 'active' | 'inactive' });
+  const [form, setForm] = useState(EMPTY_TENANT_FORM);
+  const [baseline, setBaseline] = useState(EMPTY_TENANT_FORM);
   const [errors, setErrors] = useState<{ name?: string; code?: string }>({});
 
   useEffect(() => {
     if (!tenant) return;
-    setForm({ name: tenant.name, code: tenant.code, status: tenant.status });
+    const next = { name: tenant.name, code: tenant.code, status: tenant.status };
+    setForm(next);
+    setBaseline(next);
   }, [tenant]);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseline);
 
   if (!canManage) {
     return (
@@ -72,6 +80,8 @@ export function TenantFormPage({ tenantId }: { tenantId?: number }) {
         await createTenant.mutateAsync({ name: form.name, code: form.code, status: form.status });
         addToast({ variant: 'success', title: 'Tenant dibuat', message: form.name });
       }
+      setBaseline(form);
+      allowNextNavigation();
       navigate({ to: '/tenants' });
     } catch (error) {
       addToast({
@@ -161,6 +171,8 @@ export function TenantFormPage({ tenantId }: { tenantId?: number }) {
           </Link>
         </div>
       </Card>
+
+      <UnsavedChangesGuard isDirty={isDirty} />
     </div>
   );
 }

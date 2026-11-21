@@ -114,6 +114,40 @@ export function Spinner() {
   );
 }
 
+const SKELETON_KEYS = ['one', 'two', 'three', 'four', 'five'] as const;
+
+/**
+ * Placeholder rows for list screens while the first page loads. Keeps the
+ * layout from collapsing between loading and loaded states.
+ */
+export function ListSkeleton({
+  rows = 5,
+  variant = 'table',
+}: {
+  rows?: number;
+  variant?: 'table' | 'cards';
+}) {
+  const visible = SKELETON_KEYS.slice(0, Math.max(0, Math.min(rows, SKELETON_KEYS.length)));
+
+  return (
+    <output aria-busy="true" aria-label="Memuat data" className="block space-y-2">
+      {visible.map((key) => (
+        <div
+          key={key}
+          className={
+            variant === 'cards'
+              ? 'animate-pulse rounded-lg border border-gray-200 bg-white p-4'
+              : 'animate-pulse rounded-md bg-gray-100 px-3 py-3'
+          }
+        >
+          <div className="h-4 w-1/3 rounded bg-gray-200" />
+          <div className="mt-2 h-3 w-2/3 rounded bg-gray-200" />
+        </div>
+      ))}
+    </output>
+  );
+}
+
 export function ErrorAlert({ message }: { message: string }) {
   return (
     <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 ring-1 ring-inset ring-red-600/10">

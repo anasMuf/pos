@@ -12,6 +12,7 @@ import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
 import { formatCurrency, formatDateTime, newClientId } from '../../lib/format';
+import { PAYMENT_METHOD_OPTIONS } from '../../lib/constants';
 
 export function OrderPaymentPage({ orderId }: { orderId: number }) {
   const navigate = useNavigate();
@@ -130,7 +131,19 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <Label htmlFor="payment-amount">Nominal</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="payment-amount">Nominal</Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAmount(String(remaining));
+                    setError('');
+                  }}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-500"
+                >
+                  Lunasi semua
+                </button>
+              </div>
               <Input
                 id="payment-amount"
                 type="number"
@@ -154,9 +167,11 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
                 onChange={(event) => setMethod(event.target.value as PaymentMethod)}
                 className="mt-1"
               >
-                <option value="cash">Cash</option>
-                <option value="qris">QRIS</option>
-                <option value="transfer">Transfer</option>
+                {PAYMENT_METHOD_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </Select>
             </div>
             <div className="sm:col-span-2">

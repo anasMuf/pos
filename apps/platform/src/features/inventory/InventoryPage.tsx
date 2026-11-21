@@ -4,6 +4,7 @@ import { useApp } from '../app/AppContext';
 import { useProducts, useStockMovements } from '../../api/queries';
 import { Badge, Card, EmptyState, PageHeader, StatCard, Table } from '../../components/molecules/ui';
 import { formatDateTime, formatNumber } from '../../lib/format';
+import { MOVEMENT_TYPE_LABELS } from '../../lib/constants';
 
 export function InventoryPage() {
   const { activeOutletId, activeOutlet, outlets, canManage } = useApp();
@@ -111,7 +112,7 @@ export function InventoryPage() {
                     <td className="px-3 py-2">{product?.name ?? `#${movement.product_id}`}</td>
                     <td className="px-3 py-2">
                       <Badge tone={movement.movement_type === 'sale' ? 'indigo' : 'gray'}>
-                        {movement.movement_type}
+                        {MOVEMENT_TYPE_LABELS[movement.movement_type] ?? movement.movement_type}
                       </Badge>
                     </td>
                     <td

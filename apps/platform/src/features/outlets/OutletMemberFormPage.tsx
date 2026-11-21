@@ -10,8 +10,7 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
-
-const ROLES: OutletMember['outlet_role'][] = ['owner', 'manager', 'cashier', 'operator'];
+import { OUTLET_ROLE_OPTIONS } from '../../lib/constants';
 
 export function OutletMemberFormPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
@@ -156,9 +155,9 @@ export function OutletMemberFormPage({ outletId }: { outletId: number }) {
               }
               className="mt-1"
             >
-              {ROLES.map((role) => (
-                <option key={role} value={role}>
-                  {role}
+              {OUTLET_ROLE_OPTIONS.map((role) => (
+                <option key={role.value} value={role.value}>
+                  {role.label}
                 </option>
               ))}
             </Select>

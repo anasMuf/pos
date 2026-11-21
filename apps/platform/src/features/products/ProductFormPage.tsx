@@ -11,6 +11,7 @@ import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { newClientId } from '../../lib/format';
+import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
 
 interface TierRow {
   id: string;
@@ -112,6 +113,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
+  const [baseline, setBaseline] = useState<ProductFormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
 
   const categoryOptions = useMemo(() => {
@@ -128,8 +130,13 @@ export function ProductFormPage({ productId }: { productId?: number }) {
   }, [outletProducts, form.category]);
 
   useEffect(() => {
-    if (product) setForm(parseProductForm(product));
+    if (!product) return;
+    const parsed = parseProductForm(product);
+    setForm(parsed);
+    setBaseline(parsed);
   }, [product]);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseline);
 
   if (!canManage) {
     return (
@@ -250,6 +257,8 @@ export function ProductFormPage({ productId }: { productId?: number }) {
         });
         addToast({ variant: 'success', title: 'Produk ditambahkan', message: form.name });
       }
+      setBaseline(form);
+      allowNextNavigation();
       navigate({ to: '/products' });
     } catch (error) {
       addToast({
@@ -661,6 +670,8 @@ export function ProductFormPage({ productId }: { productId?: number }) {
           </Link>
         </div>
       </Card>
+
+      <UnsavedChangesGuard isDirty={isDirty} />
     </div>
   );
 }

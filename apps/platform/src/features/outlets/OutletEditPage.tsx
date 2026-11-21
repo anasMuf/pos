@@ -10,6 +10,13 @@ import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
+import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
+
+const EMPTY_OUTLET_FORM = {
+  name: '',
+  address: '',
+  default_connection_mode: 'online' as 'online' | 'offline',
+};
 
 export function OutletEditPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
@@ -17,21 +24,22 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
   const { canManage } = useApp();
   const { data: outlet, isLoading, isError } = useOutlet(outletId);
   const updateOutlet = useUpdateOutlet();
-  const [form, setForm] = useState({
-    name: '',
-    address: '',
-    default_connection_mode: 'online' as 'online' | 'offline',
-  });
+  const [form, setForm] = useState(EMPTY_OUTLET_FORM);
+  const [baseline, setBaseline] = useState(EMPTY_OUTLET_FORM);
   const [errors, setErrors] = useState<{ name?: string; address?: string }>({});
 
   useEffect(() => {
     if (!outlet) return;
-    setForm({
+    const next = {
       name: outlet.name,
       address: outlet.address,
       default_connection_mode: outlet.default_connection_mode,
-    });
+    };
+    setForm(next);
+    setBaseline(next);
   }, [outlet]);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseline);
 
   if (!canManage) {
     return (
@@ -77,6 +85,8 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
         default_connection_mode: form.default_connection_mode,
       });
       addToast({ variant: 'success', title: 'Outlet diperbarui', message: form.name });
+      setBaseline(form);
+      allowNextNavigation();
       navigate({ to: '/outlets/$id', params: { id: String(outletId) } });
     } catch (error) {
       addToast({
@@ -158,6 +168,8 @@ export function OutletEditPage({ outletId }: { outletId: number }) {
           </Link>
         </div>
       </Card>
+
+      <UnsavedChangesGuard isDirty={isDirty} />
     </div>
   );
 }
