@@ -9,7 +9,7 @@ import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
-import { UnsavedChangesGuard } from '../../components/molecules/UnsavedChangesGuard';
+import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
 
 const EMPTY_FORM = { name: '', phone: '', email: '', address: '', note: '' };
 
@@ -86,6 +86,7 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
         addToast({ variant: 'success', title: 'Pelanggan ditambahkan', message: form.name });
       }
       setBaseline(form);
+      allowNextNavigation();
       navigate({ to: '/customers' });
     } catch (error) {
       addToast({

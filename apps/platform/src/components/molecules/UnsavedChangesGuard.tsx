@@ -1,6 +1,20 @@
 import { useBlocker } from '@tanstack/react-router';
 import { ConfirmDialog } from './ConfirmDialog';
 
+// Set right before a programmatic redirect that follows a successful save.
+let bypassNextNavigation = false;
+
+/**
+ * Lets the next navigation through without showing the unsaved-changes dialog.
+ *
+ * Call this immediately before `navigate(...)` after a successful save: the
+ * dirty flag (derived state) is still true for the current render, so the
+ * router blocker would otherwise intercept that redirect.
+ */
+export function allowNextNavigation() {
+  bypassNextNavigation = true;
+}
+
 /**
  * Warns before leaving a form with unsaved changes.
  *
@@ -13,7 +27,13 @@ import { ConfirmDialog } from './ConfirmDialog';
  */
 export function UnsavedChangesGuard({ isDirty }: { isDirty: boolean }) {
   const blocker = useBlocker({
-    shouldBlockFn: () => isDirty,
+    shouldBlockFn: () => {
+      if (bypassNextNavigation) {
+        bypassNextNavigation = false;
+        return false;
+      }
+      return isDirty;
+    },
     enableBeforeUnload: isDirty,
     withResolver: true,
   });

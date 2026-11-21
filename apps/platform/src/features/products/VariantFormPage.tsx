@@ -10,6 +10,7 @@ import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
 import { formatNumber } from '../../lib/format';
+import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
 
 const EMPTY_FORM = { name: '', sku: '', barcode: '', price_override: '', stock_qty: '0' };
 
@@ -28,20 +29,25 @@ export function VariantFormPage({
   const createVariant = useCreateVariant(productId);
   const updateVariant = useUpdateVariant(productId);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [baseline, setBaseline] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState<{ name?: string; sku?: string; stock_qty?: string }>({});
 
   const variant = variantId ? variants.find((item) => item.id === variantId) : undefined;
 
   useEffect(() => {
     if (!variant) return;
-    setForm({
+    const next = {
       name: variant.name,
       sku: variant.sku,
       barcode: variant.barcode ?? '',
       price_override: variant.price_override > 0 ? String(variant.price_override) : '',
       stock_qty: String(variant.stock_qty),
-    });
+    };
+    setForm(next);
+    setBaseline(next);
   }, [variant]);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseline);
 
   if (!canManage) {
     return (
@@ -116,6 +122,8 @@ export function VariantFormPage({
         await createVariant.mutateAsync({ ...basePayload, stock_qty: Number(form.stock_qty) || 0 });
         addToast({ variant: 'success', title: 'Varian ditambahkan', message: form.name });
       }
+      setBaseline(form);
+      allowNextNavigation();
       navigate({ to: '/products/$id/variants', params: { id: String(productId) } });
     } catch (error) {
       addToast({
@@ -239,6 +247,8 @@ export function VariantFormPage({
           </Link>
         </div>
       </Card>
+
+      <UnsavedChangesGuard isDirty={isDirty} />
     </div>
   );
 }

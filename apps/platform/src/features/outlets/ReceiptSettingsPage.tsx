@@ -10,6 +10,7 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
 
 const EMPTY_FORM = {
   header: '',
@@ -30,10 +31,11 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
   const { data: settings, isLoading, isError: isSettingsError } = useReceiptSettings(outletId);
   const updateReceipt = useUpdateReceiptSettings(outletId);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [baseline, setBaseline] = useState(EMPTY_FORM);
 
   useEffect(() => {
     if (!settings) return;
-    setForm({
+    const next = {
       header: settings.header,
       footer: settings.footer,
       paper_size: settings.paper_size,
@@ -42,8 +44,12 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
       show_payment_details: settings.show_payment_details,
       tax_label: settings.tax_label,
       tax_number: settings.tax_number,
-    });
+    };
+    setForm(next);
+    setBaseline(next);
   }, [settings]);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseline);
 
   if (!canManage) {
     return (
@@ -76,6 +82,8 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
     try {
       await updateReceipt.mutateAsync(form);
       addToast({ variant: 'success', title: 'Pengaturan struk disimpan', message: 'Perubahan diterapkan.' });
+      setBaseline(form);
+      allowNextNavigation();
       navigate({ to: '/outlets/$id', params: { id: String(outletId) } });
     } catch (error) {
       addToast({
@@ -197,6 +205,8 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
           </Link>
         </div>
       </Card>
+
+      <UnsavedChangesGuard isDirty={isDirty} />
     </div>
   );
 }
