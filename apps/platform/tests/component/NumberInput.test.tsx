@@ -47,6 +47,38 @@ describe('NumberInput', () => {
     expect(screen.getByText('%')).toBeTruthy();
   });
 
+  it('rejects letters and symbols while typing', () => {
+    render(<ControlledNumberInput initialValue="" />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: '12abc' } });
+    expect(input.value).toBe('12');
+
+    fireEvent.change(input, { target: { value: 'e5+' } });
+    expect(input.value).toBe('5');
+  });
+
+  it('accepts a comma decimal separator and caps decimal places', () => {
+    render(<ControlledNumberInput initialValue="" decimals={2} />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: '1,2345' } });
+    expect(input.value).toBe('1.23');
+  });
+
+  it('only allows negative values when there is no minimum', () => {
+    const { unmount } = render(<ControlledNumberInput initialValue="" min={0} />);
+    const positiveOnly = screen.getByLabelText('Qty') as HTMLInputElement;
+    fireEvent.change(positiveOnly, { target: { value: '-5' } });
+    expect(positiveOnly.value).toBe('5');
+    unmount();
+
+    render(<ControlledNumberInput initialValue="" />);
+    const signed = screen.getByLabelText('Qty') as HTMLInputElement;
+    fireEvent.change(signed, { target: { value: '-5' } });
+    expect(signed.value).toBe('-5');
+  });
+
   it('increments and decrements with the spinner when enabled', () => {
     render(<ControlledNumberInput initialValue="3" showStepper />);
     const input = screen.getByLabelText('Qty') as HTMLInputElement;

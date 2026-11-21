@@ -29,6 +29,26 @@ function round(value: number, decimals: number): number {
 }
 
 /**
+ * Keeps only characters that can form a number, so the text field can never
+ * hold letters/`e`/`+`. Accepts `,` as a decimal separator (common in id-ID
+ * keyboards) and normalises it to `.`.
+ */
+function sanitizeValue(raw: string, decimals: number, allowNegative: boolean): string {
+  const negative = allowNegative && raw.trimStart().startsWith('-');
+  const digitsAndDot = raw.replace(/,/g, '.').replace(/[^\d.]/g, '');
+  const [integerPart = '', ...rest] = digitsAndDot.split('.');
+  const integer = integerPart.replace(/^0+(?=\d)/, '');
+  const sign = negative ? '-' : '';
+
+  if (decimals === 0) return `${sign}${integer}`;
+
+  if (rest.length === 0 && !digitsAndDot.includes('.')) return `${sign}${integer}`;
+
+  const decimalPart = rest.join('').slice(0, decimals);
+  return `${sign}${integer || '0'}.${decimalPart}`;
+}
+
+/**
  * Numeric text input with an optional spinner (chevron) control.
  *
  * Values stay as strings so partially typed input like "1." is never lost.
@@ -72,7 +92,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value);
+    onChange(sanitizeValue(event.target.value, decimals, min === undefined));
   };
 
   const padding = showStepper ? 'pr-9' : suffix ? 'pr-8' : 'pr-3';
