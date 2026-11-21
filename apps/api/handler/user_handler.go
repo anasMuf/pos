@@ -5,6 +5,8 @@ import (
 	"api/service"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -13,11 +15,13 @@ import (
 
 type UserHandler struct {
 	userService service.UserService
+	access      *service.AccessService
 }
 
-func NewUserHandler(userService service.UserService) *UserHandler {
+func NewUserHandler(userService service.UserService, access *service.AccessService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
+		access:      access,
 	}
 }
 
@@ -54,6 +58,19 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 // @Success      201      {object}  dto.SuccessResponse
 // @Failure      400      {object}  dto.ErrorResponse
 // @Router       /users/register [post]
+func (h *UserHandler) SearchUsers(c echo.Context) error {
+	uid := currentUserID(c)
+	if !h.access.IsGlobalAdmin(uid) && len(h.access.ManageableOutletIDs(uid)) == 0 {
+		return forbidden("")
+	}
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	users, err := h.userService.SearchUsers(strings.TrimSpace(c.QueryParam("search")), limit)
+	if err != nil {
+		return mapError(err)
+	}
+	return respond(c, http.StatusOK, "Users retrieved successfully", users)
+}
+
 func (h *UserHandler) CreateUser(c echo.Context) error {
 	var req dto.CreateUserRequest
 	if err := c.Bind(&req); err != nil {

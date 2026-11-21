@@ -13,6 +13,7 @@ type UserService interface {
 	GetUserByEmail(email string) (*dto.UserResponse, error)
 	CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, error)
 	LoginUser(email, password string) (*dto.UserResponse, error)
+	SearchUsers(query string, limit int) ([]dto.UserLookupResponse, error)
 }
 
 type userService struct {
@@ -76,6 +77,26 @@ func (s *userService) CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, 
 		Role:     user.Role,
 		Deposit:  user.Deposit,
 	}, nil
+}
+
+func (s *userService) SearchUsers(query string, limit int) ([]dto.UserLookupResponse, error) {
+	if limit <= 0 || limit > 50 {
+		limit = 20
+	}
+	users, err := s.userRepository.Search(query, limit)
+	if err != nil {
+		return nil, err
+	}
+	results := make([]dto.UserLookupResponse, 0, len(users))
+	for _, user := range users {
+		results = append(results, dto.UserLookupResponse{
+			ID:       user.ID,
+			FullName: user.FullName,
+			Username: user.Username,
+			Email:    user.Email,
+		})
+	}
+	return results, nil
 }
 
 func (s *userService) LoginUser(email, password string) (*dto.UserResponse, error) {

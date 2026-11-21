@@ -9,6 +9,7 @@ import (
 type UserRepository interface {
 	FindByEmail(email string) (*model.User, error)
 	FindByUsername(username string) (*model.User, error)
+	Search(query string, limit int) ([]model.User, error)
 	Create(req *model.User) error
 	UpdateDeposit(userID uint, amount float64) error
 	UpdateMinDeposit(userID uint, amount float64) error
@@ -33,6 +34,19 @@ func (r *userRepository) FindByUsername(username string) (*model.User, error) {
 	var user model.User
 	err := r.db.Where("username = ?", username).First(&user).Error
 	return &user, err
+}
+
+func (r *userRepository) Search(query string, limit int) ([]model.User, error) {
+	var users []model.User
+	q := r.db.Order("full_name ASC").Limit(limit)
+	if query != "" {
+		like := "%" + query + "%"
+		q = q.Where("full_name ILIKE ? OR email ILIKE ? OR username ILIKE ?", like, like, like)
+	}
+	if err := q.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (r *userRepository) Create(req *model.User) error {

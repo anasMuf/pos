@@ -33,6 +33,7 @@ import type {
   StockMovement,
   SyncResult,
   Tenant,
+  UserLookup,
 } from './types';
 
 export const queryKeys = {
@@ -179,6 +180,19 @@ export function useOutletMembers(outletId: number | null) {
     queryKey: queryKeys.outletMembers(outletId ?? 0),
     queryFn: () => apiGet<OutletMember[]>(`/outlets/${outletId}/members`),
     enabled: !!outletId,
+  });
+}
+
+export function useSearchUsers(search: string) {
+  return useQuery({
+    queryKey: ['user-search', search],
+    queryFn: () =>
+      apiGet<UserLookup[]>('/users/search', {
+        search: search.trim(),
+        limit: 20,
+      }),
+    enabled: search.trim().length >= 2,
+    staleTime: 60 * 1000,
   });
 }
 
