@@ -18,20 +18,11 @@ import { Input } from '../../components/atoms/Input';
 import { useToast } from '../../components/molecules/Toast';
 import { ReceiptModal } from '../receipts/ReceiptModal';
 import { formatCurrency, formatDateTime } from '../../lib/format';
-
-export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  queued: 'Antrean',
-  in_progress: 'Diproses',
-  ready: 'Siap',
-  completed: 'Selesai',
-  cancelled: 'Dibatalkan',
-};
-
-const PAYMENT_TONES: Record<PaymentStatus, 'green' | 'yellow' | 'red'> = {
-  paid: 'green',
-  partial: 'yellow',
-  unpaid: 'red',
-};
+import {
+  ORDER_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS_TONES,
+} from '../../lib/constants';
 
 export function OrdersPage() {
   const { activeOutletId, activeOutlet, outlets, canOperate, canFulfill } = useApp();
@@ -123,9 +114,11 @@ export function OrdersPage() {
         </Select>
         <Select value={paymentFilter} onChange={(event) => setPaymentFilter(event.target.value as PaymentStatus | '')}>
           <option value="">Semua status pembayaran</option>
-          <option value="unpaid">Belum bayar</option>
-          <option value="partial">DP / Sebagian</option>
-          <option value="paid">Lunas</option>
+          {Object.entries(PAYMENT_STATUS_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
         </Select>
       </div>
 
@@ -149,7 +142,7 @@ export function OrdersPage() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-bold text-gray-900">{order.order_number}</p>
-                    <Badge tone={PAYMENT_TONES[order.payment_status]}>{order.payment_status}</Badge>
+                    <Badge tone={PAYMENT_STATUS_TONES[order.payment_status]}>{order.payment_status}</Badge>
                     <Badge tone="indigo">{ORDER_STATUS_LABELS[order.order_status] ?? order.order_status}</Badge>
                     {order.is_offline_created && <Badge tone="gray">offline</Badge>}
                   </div>

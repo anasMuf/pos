@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useDeleteCustomer, useInfiniteCustomers, useOrders } from '../../api/queries';
-import type { Customer, Order, PaymentStatus } from '../../api/types';
+import type { Customer, Order } from '../../api/types';
 import {
   Badge,
   Card,
@@ -19,12 +19,7 @@ import { ConfirmDialog } from '../../components/molecules/ConfirmDialog';
 import { useToast } from '../../components/molecules/Toast';
 import { ReceiptModal } from '../receipts/ReceiptModal';
 import { formatCurrency, formatDateTime } from '../../lib/format';
-
-const PAYMENT_TONES: Record<PaymentStatus, 'green' | 'yellow' | 'red'> = {
-  paid: 'green',
-  partial: 'yellow',
-  unpaid: 'red',
-};
+import { PAYMENT_STATUS_TONES } from '../../lib/constants';
 
 export function CustomersPage() {
   const { activeOutletId, activeOutlet, outlets, canOperate, canManage } = useApp();
@@ -198,7 +193,7 @@ export function CustomersPage() {
                     <td className="px-3 py-2 text-gray-500">{formatDateTime(order.created_at)}</td>
                     <td className="px-3 py-2">{formatCurrency(order.total_amount)}</td>
                     <td className="px-3 py-2">
-                      <Badge tone={PAYMENT_TONES[order.payment_status]}>{order.payment_status}</Badge>
+                      <Badge tone={PAYMENT_STATUS_TONES[order.payment_status]}>{order.payment_status}</Badge>
                     </td>
                     <td className="px-3 py-2">
                       <Button type="button" size="sm" variant="secondary" onClick={() => setReceiptOrder(order)}>

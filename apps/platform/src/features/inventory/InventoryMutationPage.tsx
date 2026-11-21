@@ -11,12 +11,7 @@ import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
-
-const MANUAL_TYPES: { value: MovementType; label: string }[] = [
-  { value: 'stock_in', label: 'Stok Masuk' },
-  { value: 'stock_out', label: 'Stok Keluar' },
-  { value: 'adjustment', label: 'Penyesuaian / Opname' },
-];
+import { MANUAL_MOVEMENT_TYPES } from '../../lib/constants';
 
 export function InventoryMutationPage({
   initialProductId,
@@ -170,7 +165,7 @@ export function InventoryMutationPage({
               onChange={(event) => setMovementType(event.target.value as MovementType)}
               className="mt-1"
             >
-              {MANUAL_TYPES.map((type) => (
+              {MANUAL_MOVEMENT_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
                 </option>

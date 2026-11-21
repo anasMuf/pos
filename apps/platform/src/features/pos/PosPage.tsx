@@ -20,6 +20,7 @@ import { FieldError } from '../../components/atoms/FieldError';
 import { useToast } from '../../components/molecules/Toast';
 import { formatCurrency, newClientId } from '../../lib/format';
 import { priceLine } from '../../lib/pricing';
+import { PAYMENT_METHOD_OPTIONS } from '../../lib/constants';
 import { QuickCustomerModal } from './QuickCustomerModal';
 
 interface CartItem {
@@ -535,9 +536,11 @@ export function PosPage() {
                     onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}
                     className="mt-1"
                   >
-                    <option value="cash">Cash</option>
-                    <option value="qris">QRIS</option>
-                    <option value="transfer">Transfer</option>
+                    {PAYMENT_METHOD_OPTIONS.map((method) => (
+                      <option key={method.value} value={method.value}>
+                        {method.label}
+                      </option>
+                    ))}
                   </Select>
                 </div>
               </div>

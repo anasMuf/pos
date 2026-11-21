@@ -11,6 +11,7 @@ import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { UnsavedChangesGuard, allowNextNavigation } from '../../components/molecules/UnsavedChangesGuard';
+import { PAPER_SIZE_OPTIONS } from '../../lib/constants';
 
 const EMPTY_FORM = {
   header: '',
@@ -140,9 +141,11 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
               onChange={(event) => setForm({ ...form, paper_size: event.target.value as PaperSize })}
               className="mt-1"
             >
-              <option value="58mm">58mm</option>
-              <option value="80mm">80mm</option>
-              <option value="A4">A4</option>
+              {PAPER_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
             </Select>
           </div>
           <div>
