@@ -90,4 +90,33 @@ test.describe('cashier checkout', () => {
       page.getByRole('combobox', { name: 'Ubah status pengerjaan' }).first(),
     ).toBeEnabled();
   });
+
+  test('adds a customer without leaving the cashier', async ({ page, request }) => {
+    test.skip(!(await apiAvailable(request)), 'API is not reachable; start the backend first.');
+
+    const adminToken = await apiLogin(request);
+    const outlets = await listOutlets(request, adminToken);
+    expect(outlets.length).toBeGreaterThan(0);
+    const outlet = outlets[0];
+    const customerName = `Pelanggan E2E ${Date.now()}`;
+
+    await loginUi(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    await setActiveOutlet(page, outlet.id);
+    await page.reload();
+
+    await page.goto('/pos');
+    await page.getByRole('button', { name: 'Pelanggan baru' }).click();
+    await expect(page.getByRole('dialog', { name: 'Pelanggan Baru' })).toBeVisible();
+
+    await page.getByLabel('Nama', { exact: true }).fill(customerName);
+    await page.getByLabel('Telepon (opsional)').fill('081234567890');
+    await page.getByRole('button', { name: 'Simpan', exact: true }).click();
+
+    await expect(page.getByRole('dialog', { name: 'Pelanggan Baru' })).toHaveCount(0);
+    await expect(page.getByRole('combobox', { name: 'Pelanggan Terdaftar' })).toHaveValue(/\d+/);
+    const selected = await page
+      .getByRole('combobox', { name: 'Pelanggan Terdaftar' })
+      .evaluate((element) => (element as HTMLSelectElement).selectedOptions[0]?.textContent ?? '');
+    expect(selected).toContain(customerName);
+  });
 });

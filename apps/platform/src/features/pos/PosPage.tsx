@@ -20,6 +20,7 @@ import { FieldError } from '../../components/atoms/FieldError';
 import { useToast } from '../../components/molecules/Toast';
 import { formatCurrency, newClientId } from '../../lib/format';
 import { priceLine } from '../../lib/pricing';
+import { QuickCustomerModal } from './QuickCustomerModal';
 
 interface CartItem {
   key: string;
@@ -45,6 +46,7 @@ export function PosPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerName, setCustomerName] = useState('');
   const [customerId, setCustomerId] = useState('');
+  const [quickCustomerOpen, setQuickCustomerOpen] = useState(false);
   const [paymentType, setPaymentType] = useState<PaymentType>('full');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -432,7 +434,16 @@ export function PosPage() {
           <Card title="Pembayaran">
             <div className="space-y-3">
               <div>
-                <Label htmlFor="customer-select">Pelanggan Terdaftar</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="customer-select">Pelanggan Terdaftar</Label>
+                  <button
+                    type="button"
+                    onClick={() => setQuickCustomerOpen(true)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Pelanggan baru
+                  </button>
+                </div>
                 <Select
                   id="customer-select"
                   value={customerId}
@@ -613,6 +624,18 @@ export function PosPage() {
           </Card>
         </div>
       </div>
+
+      {quickCustomerOpen && activeOutletId && (
+        <QuickCustomerModal
+          outletId={activeOutletId}
+          onClose={() => setQuickCustomerOpen(false)}
+          onCreated={(customer) => {
+            setCustomerId(String(customer.id));
+            setCustomerName(customer.name);
+            setQuickCustomerOpen(false);
+          }}
+        />
+      )}
 
       {selectedProduct && (
         <ItemConfigurator
