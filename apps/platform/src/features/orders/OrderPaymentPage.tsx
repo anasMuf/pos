@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useAddPayment, useCashShifts, useOrder } from '../../api/queries';
 import type { PaymentMethod } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
@@ -16,7 +16,7 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canOperate } = useApp();
-  const { data: order, isLoading } = useOrder(orderId);
+  const { data: order, isLoading, isError } = useOrder(orderId);
   const { data: shifts = [] } = useCashShifts(order?.outlet_id);
   const addPayment = useAddPayment();
   const [amount, setAmount] = useState('');
@@ -39,11 +39,19 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
   }
 
   if (isLoading) return <Spinner />;
-  if (!order) {
+  if (isError || !order) {
     return (
       <div>
         <PageHeader title="Pembayaran Pesanan" />
-        <p className="text-sm text-gray-500">Pesanan tidak ditemukan.</p>
+        <EmptyState
+          title="Pesanan tidak ditemukan"
+          description="Pesanan tidak tersedia atau Anda tidak memiliki akses."
+          action={
+            <Link to="/orders" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Pesanan
+            </Link>
+          }
+        />
       </div>
     );
   }

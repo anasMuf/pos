@@ -14,7 +14,7 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canOperate } = useApp();
-  const { data: shift, isLoading } = useCashShift(shiftId);
+  const { data: shift, isLoading, isError } = useCashShift(shiftId);
   const closeMutation = useCloseShift();
   const [closingCash, setClosingCash] = useState('');
 
@@ -28,7 +28,7 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   }
 
   if (isLoading) return <Spinner />;
-  if (!shift) {
+  if (isError || !shift) {
     return (
       <div>
         <PageHeader title="Tutup Shift" />

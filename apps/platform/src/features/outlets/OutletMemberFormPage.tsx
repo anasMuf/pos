@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useAssignOutletMember, useOutlet } from '../../api/queries';
 import type { OutletMember } from '../../api/types';
-import { AccessDenied, Card, PageHeader } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
@@ -17,9 +17,27 @@ export function OutletMemberFormPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canManage } = useApp();
-  const { data: outlet } = useOutlet(outletId);
+  const { data: outlet, isLoading, isError } = useOutlet(outletId);
   const assignMember = useAssignOutletMember(outletId);
   const [form, setForm] = useState({ userId: '', role: 'cashier' as OutletMember['outlet_role'] });
+
+  if (isLoading) return <Spinner />;
+  if (isError || !outlet) {
+    return (
+      <div>
+        <PageHeader title="Tambah Anggota" />
+        <EmptyState
+          title="Outlet tidak ditemukan"
+          description="Outlet tidak tersedia atau Anda tidak memiliki akses."
+          action={
+            <Link to="/outlets" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Outlet
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   if (!canManage) {
     return (

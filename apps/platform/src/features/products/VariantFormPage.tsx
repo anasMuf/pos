@@ -3,7 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useCreateVariant, useProduct, useUpdateVariant, useVariants } from '../../api/queries';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
@@ -21,8 +21,8 @@ export function VariantFormPage({
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canManage } = useApp();
-  const { data: product, isLoading: isLoadingProduct } = useProduct(productId);
-  const { data: variants = [], isLoading: isLoadingVariants } = useVariants(productId);
+  const { data: product, isLoading: isLoadingProduct, isError: isProductError } = useProduct(productId);
+  const { data: variants = [], isLoading: isLoadingVariants, isError: isVariantsError } = useVariants(productId);
   const createVariant = useCreateVariant(productId);
   const updateVariant = useUpdateVariant(productId);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -50,6 +50,42 @@ export function VariantFormPage({
   }
 
   if (isLoadingProduct || (variantId && isLoadingVariants)) return <Spinner />;
+  if (isProductError || !product) {
+    return (
+      <div>
+        <PageHeader title="Varian" />
+        <EmptyState
+          title="Produk tidak ditemukan"
+          description="Produk tidak tersedia atau Anda tidak memiliki akses ke outletnya."
+          action={
+            <Link to="/products" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Produk
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+  if (variantId && (isVariantsError || !variant)) {
+    return (
+      <div>
+        <PageHeader title="Edit Varian" />
+        <EmptyState
+          title="Varian tidak ditemukan"
+          description="Varian mungkin sudah dihapus dari produk ini."
+          action={
+            <Link
+              to="/products/$id/variants"
+              params={{ id: String(productId) }}
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white"
+            >
+              Kembali ke Varian
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     if (!form.name || !form.sku) {

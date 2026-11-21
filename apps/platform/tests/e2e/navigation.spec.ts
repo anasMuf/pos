@@ -48,6 +48,12 @@ test.describe('dedicated form pages', () => {
     await page.goto(`/outlets/${outlet.id}/members/new`);
     await expect(page.getByRole('heading', { name: 'Tambah Anggota Outlet' })).toBeVisible();
 
+    // Missing entities show a clear error state instead of an empty form.
+    await page.goto('/products/999999/edit');
+    await expect(page.getByRole('heading', { name: 'Produk tidak ditemukan' })).toBeVisible();
+    await page.goto('/customers/999999/edit');
+    await expect(page.getByRole('heading', { name: 'Pelanggan tidak ditemukan' })).toBeVisible();
+
     const ordersResponse = await request.get(`${API_URL}/orders?outlet_id=${outlet.id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });

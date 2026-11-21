@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useOutlet, useReceiptSettings, useUpdateReceiptSettings } from '../../api/queries';
 import type { PaperSize } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
@@ -26,8 +26,8 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canManage } = useApp();
-  const { data: outlet } = useOutlet(outletId);
-  const { data: settings, isLoading } = useReceiptSettings(outletId);
+  const { data: outlet, isError: isOutletError } = useOutlet(outletId);
+  const { data: settings, isLoading, isError: isSettingsError } = useReceiptSettings(outletId);
   const updateReceipt = useUpdateReceiptSettings(outletId);
   const [form, setForm] = useState(EMPTY_FORM);
 
@@ -55,6 +55,22 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
   }
 
   if (isLoading) return <Spinner />;
+  if (isOutletError || !outlet || isSettingsError) {
+    return (
+      <div>
+        <PageHeader title="Pengaturan Struk" />
+        <EmptyState
+          title="Pengaturan struk tidak tersedia"
+          description="Outlet atau pengaturan struk tidak dapat dimuat."
+          action={
+            <Link to="/outlets" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Outlet
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     try {

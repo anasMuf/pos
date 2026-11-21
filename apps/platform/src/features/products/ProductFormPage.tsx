@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useCreateProduct, useProduct, useUpdateProduct } from '../../api/queries';
 import type { CommissionType, PricingType } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
@@ -33,7 +33,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { activeOutletId, activeOutlet, canManage } = useApp();
-  const { data: product, isLoading } = useProduct(productId ?? null);
+  const { data: product, isLoading, isError } = useProduct(productId ?? null);
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const [form, setForm] = useState(EMPTY_FORM);
@@ -66,6 +66,22 @@ export function ProductFormPage({ productId }: { productId?: number }) {
   }
 
   if (productId && isLoading) return <Spinner />;
+  if (productId && (isError || !product)) {
+    return (
+      <div>
+        <PageHeader title="Edit Produk" />
+        <EmptyState
+          title="Produk tidak ditemukan"
+          description="Produk tidak tersedia atau Anda tidak memiliki akses ke outletnya."
+          action={
+            <Link to="/products" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Produk
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     if (!form.name || !form.sku || !form.category) {

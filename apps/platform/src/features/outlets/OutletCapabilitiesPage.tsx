@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useCapabilityRegistry, useOutlet, useUpdateCapabilities } from '../../api/queries';
 import type { Capabilities } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { useToast } from '../../components/molecules/Toast';
 import { Select } from '../../components/atoms/Select';
@@ -21,7 +21,7 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canManage } = useApp();
-  const { data: outlet, isLoading } = useOutlet(outletId);
+  const { data: outlet, isLoading, isError } = useOutlet(outletId);
   const { data: registry } = useCapabilityRegistry();
   const definitions = registry ?? FALLBACK_CAPABILITIES;
   const updateCapabilities = useUpdateCapabilities(outletId);
@@ -44,6 +44,22 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   }
 
   if (isLoading) return <Spinner />;
+  if (isError || !outlet) {
+    return (
+      <div>
+        <PageHeader title="Capability Outlet" />
+        <EmptyState
+          title="Outlet tidak ditemukan"
+          description="Outlet tidak tersedia atau Anda tidak memiliki akses."
+          action={
+            <Link to="/outlets" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Outlet
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   const applyPreset = (value: string) => {
     setPreset(value);
