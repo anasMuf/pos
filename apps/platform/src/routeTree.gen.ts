@@ -36,6 +36,7 @@ import { Route as AuthenticatedInventoryNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedCustomersNewRouteImport } from './routes/_authenticated/customers/new'
 import { Route as AuthenticatedCustomersIdRouteImport } from './routes/_authenticated/customers/$id'
 import { Route as AuthenticatedOutletsIdIndexRouteImport } from './routes/_authenticated/outlets/$id.index'
+import { Route as AuthenticatedCustomersIdIndexRouteImport } from './routes/_authenticated/customers/$id.index'
 import { Route as AuthenticatedTenantsIdEditRouteImport } from './routes/_authenticated/tenants/$id.edit'
 import { Route as AuthenticatedShiftsIdCloseRouteImport } from './routes/_authenticated/shifts/$id.close'
 import { Route as AuthenticatedProductsIdVariantsRouteImport } from './routes/_authenticated/products/$id.variants'
@@ -198,6 +199,12 @@ const AuthenticatedOutletsIdIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedOutletsIdRoute,
   } as any)
+const AuthenticatedCustomersIdIndexRoute =
+  AuthenticatedCustomersIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCustomersIdRoute,
+  } as any)
 const AuthenticatedTenantsIdEditRoute =
   AuthenticatedTenantsIdEditRouteImport.update({
     id: '/edit',
@@ -325,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/products/$id/variants': typeof AuthenticatedProductsIdVariantsRouteWithChildren
   '/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
   '/tenants/$id/edit': typeof AuthenticatedTenantsIdEditRoute
+  '/customers/$id/': typeof AuthenticatedCustomersIdIndexRoute
   '/outlets/$id/': typeof AuthenticatedOutletsIdIndexRoute
   '/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
   '/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
@@ -339,7 +347,6 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
-  '/customers/$id': typeof AuthenticatedCustomersIdRouteWithChildren
   '/customers/new': typeof AuthenticatedCustomersNewRoute
   '/inventory/new': typeof AuthenticatedInventoryNewRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
@@ -366,6 +373,7 @@ export interface FileRoutesByTo {
   '/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
   '/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
   '/tenants/$id/edit': typeof AuthenticatedTenantsIdEditRoute
+  '/customers/$id': typeof AuthenticatedCustomersIdIndexRoute
   '/outlets/$id': typeof AuthenticatedOutletsIdIndexRoute
   '/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
   '/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
@@ -411,6 +419,7 @@ export interface FileRoutesById {
   '/_authenticated/products/$id/variants': typeof AuthenticatedProductsIdVariantsRouteWithChildren
   '/_authenticated/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
   '/_authenticated/tenants/$id/edit': typeof AuthenticatedTenantsIdEditRoute
+  '/_authenticated/customers/$id/': typeof AuthenticatedCustomersIdIndexRoute
   '/_authenticated/outlets/$id/': typeof AuthenticatedOutletsIdIndexRoute
   '/_authenticated/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
   '/_authenticated/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
@@ -456,6 +465,7 @@ export interface FileRouteTypes {
     | '/products/$id/variants'
     | '/shifts/$id/close'
     | '/tenants/$id/edit'
+    | '/customers/$id/'
     | '/outlets/$id/'
     | '/outlets/$id/members/new'
     | '/products/$id/variants/$variantId'
@@ -470,7 +480,6 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/'
-    | '/customers/$id'
     | '/customers/new'
     | '/inventory/new'
     | '/orders/$id'
@@ -497,6 +506,7 @@ export interface FileRouteTypes {
     | '/products/$id/edit'
     | '/shifts/$id/close'
     | '/tenants/$id/edit'
+    | '/customers/$id'
     | '/outlets/$id'
     | '/outlets/$id/members/new'
     | '/products/$id/variants/$variantId'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/_authenticated/products/$id/variants'
     | '/_authenticated/shifts/$id/close'
     | '/_authenticated/tenants/$id/edit'
+    | '/_authenticated/customers/$id/'
     | '/_authenticated/outlets/$id/'
     | '/_authenticated/outlets/$id/members/new'
     | '/_authenticated/products/$id/variants/$variantId'
@@ -746,6 +757,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOutletsIdIndexRouteImport
       parentRoute: typeof AuthenticatedOutletsIdRoute
     }
+    '/_authenticated/customers/$id/': {
+      id: '/_authenticated/customers/$id/'
+      path: '/'
+      fullPath: '/customers/$id/'
+      preLoaderRoute: typeof AuthenticatedCustomersIdIndexRouteImport
+      parentRoute: typeof AuthenticatedCustomersIdRoute
+    }
     '/_authenticated/tenants/$id/edit': {
       id: '/_authenticated/tenants/$id/edit'
       path: '/edit'
@@ -856,11 +874,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedCustomersIdRouteChildren {
   AuthenticatedCustomersIdEditRoute: typeof AuthenticatedCustomersIdEditRoute
+  AuthenticatedCustomersIdIndexRoute: typeof AuthenticatedCustomersIdIndexRoute
 }
 
 const AuthenticatedCustomersIdRouteChildren: AuthenticatedCustomersIdRouteChildren =
   {
     AuthenticatedCustomersIdEditRoute: AuthenticatedCustomersIdEditRoute,
+    AuthenticatedCustomersIdIndexRoute: AuthenticatedCustomersIdIndexRoute,
   }
 
 const AuthenticatedCustomersIdRouteWithChildren =

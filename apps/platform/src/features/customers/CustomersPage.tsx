@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
-import { useDeleteCustomer, useInfiniteCustomers, useOrders } from '../../api/queries';
-import type { Customer, Order } from '../../api/types';
+import { useDeleteCustomer, useInfiniteCustomers } from '../../api/queries';
+import type { Customer } from '../../api/types';
 import {
-  Badge,
   Card,
   EmptyState,
   InfiniteScrollSentinel,
@@ -17,9 +16,6 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { ConfirmDialog } from '../../components/molecules/ConfirmDialog';
 import { useToast } from '../../components/molecules/Toast';
-import { ReceiptModal } from '../receipts/ReceiptModal';
-import { formatCurrency, formatDateTime } from '../../lib/format';
-import { PAYMENT_STATUS_TONES } from '../../lib/constants';
 
 export function CustomersPage() {
   const { activeOutletId, activeOutlet, outlets, canOperate, canManage } = useApp();
@@ -35,14 +31,7 @@ export function CustomersPage() {
   const customers = customerPages?.pages.flatMap((page) => page.items) ?? [];
   const totalCustomers = customerPages?.pages[0]?.meta.total;
   const deleteCustomer = useDeleteCustomer();
-  const [selected, setSelected] = useState<Customer | null>(null);
-  const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
   const [toDelete, setToDelete] = useState<Customer | null>(null);
-
-  const { data: selectedHistory = [] } = useOrders(
-    { outlet_id: activeOutletId ?? undefined, customer_id: selected?.id },
-    !!selected,
-  );
 
   if (outlets.length === 0) {
     return (
@@ -65,7 +54,6 @@ export function CustomersPage() {
     if (!toDelete) return;
     try {
       await deleteCustomer.mutateAsync(toDelete.id);
-      if (selected?.id === toDelete.id) setSelected(null);
       addToast({ variant: 'success', title: 'Pelanggan dihapus', message: toDelete.name });
       setToDelete(null);
     } catch (error) {
@@ -76,8 +64,6 @@ export function CustomersPage() {
       });
     }
   };
-
-  const rows = selectedHistory;
 
   return (
     <div>
@@ -101,6 +87,7 @@ export function CustomersPage() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Cari nama, telepon, atau email"
+          aria-label="Cari pelanggan"
         />
       </div>
 
@@ -132,9 +119,13 @@ export function CustomersPage() {
                 <td className="px-3 py-2 text-gray-500">{customer.note || '—'}</td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap items-center gap-1">
-                    <Button type="button" size="sm" variant="secondary" onClick={() => setSelected(customer)}>
+                    <Link
+                      to="/customers/$id"
+                      params={{ id: String(customer.id) }}
+                      className="inline-flex items-center rounded-md bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    >
                       Riwayat
-                    </Button>
+                    </Link>
                     {canOperate && (
                       <Link
                         to="/customers/$id/edit"
@@ -171,45 +162,6 @@ export function CustomersPage() {
         </Card>
       )}
 
-      <div className="mt-6">
-        <Card
-          title={selected ? `Riwayat Pesanan · ${selected.name}` : 'Riwayat Pesanan'}
-          action={
-            selected ? (
-              <Button type="button" size="sm" variant="secondary" onClick={() => setSelected(null)}>
-                Tampilkan semua pelanggan
-              </Button>
-            ) : undefined
-          }
-        >
-          {selected ? (
-            rows.length === 0 ? (
-              <p className="text-sm text-gray-500">Belum ada pesanan untuk pelanggan ini.</p>
-            ) : (
-              <Table headers={['Nomor', 'Tanggal', 'Total', 'Pembayaran', 'Aksi']}>
-                {rows.map((order) => (
-                  <tr key={order.id}>
-                    <td className="px-3 py-2 font-medium text-gray-900">{order.order_number}</td>
-                    <td className="px-3 py-2 text-gray-500">{formatDateTime(order.created_at)}</td>
-                    <td className="px-3 py-2">{formatCurrency(order.total_amount)}</td>
-                    <td className="px-3 py-2">
-                      <Badge tone={PAYMENT_STATUS_TONES[order.payment_status]}>{order.payment_status}</Badge>
-                    </td>
-                    <td className="px-3 py-2">
-                      <Button type="button" size="sm" variant="secondary" onClick={() => setReceiptOrder(order)}>
-                        Struk
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </Table>
-            )
-          ) : (
-            <p className="text-sm text-gray-500">Pilih pelanggan untuk melihat riwayat pesanan.</p>
-          )}
-        </Card>
-      </div>
-
       <ConfirmDialog
         open={!!toDelete}
         title="Hapus pelanggan"
@@ -220,15 +172,6 @@ export function CustomersPage() {
         onConfirm={handleDelete}
         onCancel={() => setToDelete(null)}
       />
-
-      {receiptOrder && (
-        <ReceiptModal
-          order={receiptOrder}
-          outletId={receiptOrder.outlet_id}
-          outletName={activeOutlet?.name ?? 'Outlet'}
-          onClose={() => setReceiptOrder(null)}
-        />
-      )}
     </div>
   );
 }
