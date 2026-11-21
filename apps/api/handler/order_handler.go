@@ -22,7 +22,7 @@ func (h *OrderHandler) List(c echo.Context) error {
 	page, limit := pagination(c)
 	outletID, _ := strconv.ParseUint(c.QueryParam("outlet_id"), 10, 64)
 	customerID, _ := strconv.ParseUint(c.QueryParam("customer_id"), 10, 64)
-	orders, _, err := h.service.List(
+	orders, total, err := h.service.List(
 		page, limit, uint(outletID), uint(customerID),
 		c.QueryParam("order_status"),
 		c.QueryParam("payment_status"),
@@ -32,7 +32,7 @@ func (h *OrderHandler) List(c echo.Context) error {
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Orders retrieved successfully", orders)
+	return respondPage(c, http.StatusOK, "Orders retrieved successfully", orders, page, limit, total)
 }
 
 func (h *OrderHandler) Get(c echo.Context) error {

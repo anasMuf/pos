@@ -26,11 +26,11 @@ func (h *CustomerHandler) List(c echo.Context) error {
 		return forbidden("")
 	}
 
-	customers, _, err := h.service.List(page, limit, uint(outletID), c.QueryParam("search"), h.access.OutletIDs(uid))
+	customers, total, err := h.service.List(page, limit, uint(outletID), c.QueryParam("search"), h.access.OutletIDs(uid))
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Customers retrieved successfully", customers)
+	return respondPage(c, http.StatusOK, "Customers retrieved successfully", customers, page, limit, total)
 }
 
 func (h *CustomerHandler) Get(c echo.Context) error {

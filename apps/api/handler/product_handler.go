@@ -21,11 +21,11 @@ func NewProductHandler(s *service.ProductService, access *service.AccessService)
 func (h *ProductHandler) List(c echo.Context) error {
 	page, limit := pagination(c)
 	outletID, _ := strconv.ParseUint(c.QueryParam("outlet_id"), 10, 64)
-	products, _, err := h.service.List(page, limit, c.QueryParam("search"), uint(outletID), c.QueryParam("category"), h.access.OutletIDs(currentUserID(c)))
+	products, total, err := h.service.List(page, limit, c.QueryParam("search"), uint(outletID), c.QueryParam("category"), h.access.OutletIDs(currentUserID(c)))
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Products retrieved successfully", products)
+	return respondPage(c, http.StatusOK, "Products retrieved successfully", products, page, limit, total)
 }
 
 func (h *ProductHandler) Get(c echo.Context) error {

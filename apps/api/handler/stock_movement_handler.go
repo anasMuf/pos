@@ -22,11 +22,11 @@ func (h *StockMovementHandler) List(c echo.Context) error {
 	page, limit := pagination(c)
 	outletID, _ := strconv.ParseUint(c.QueryParam("outlet_id"), 10, 64)
 	productID, _ := strconv.ParseUint(c.QueryParam("product_id"), 10, 64)
-	movements, _, err := h.service.List(page, limit, uint(outletID), uint(productID), c.QueryParam("movement_type"), h.access.OutletIDs(currentUserID(c)))
+	movements, total, err := h.service.List(page, limit, uint(outletID), uint(productID), c.QueryParam("movement_type"), h.access.OutletIDs(currentUserID(c)))
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Stock movements retrieved successfully", movements)
+	return respondPage(c, http.StatusOK, "Stock movements retrieved successfully", movements, page, limit, total)
 }
 
 func (h *StockMovementHandler) Create(c echo.Context) error {

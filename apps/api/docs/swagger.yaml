@@ -55,11 +55,24 @@ definitions:
       token:
         type: string
     type: object
+  dto.PaginationMeta:
+    properties:
+      has_more:
+        type: boolean
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
   dto.SuccessResponse:
     properties:
       data: {}
       message:
         type: string
+      meta:
+        $ref: '#/definitions/dto.PaginationMeta'
       status:
         type: integer
     type: object

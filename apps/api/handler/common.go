@@ -81,3 +81,13 @@ func containsID(ids []uint, target uint) bool {
 func respond(c echo.Context, status int, message string, data interface{}) error {
 	return c.JSON(status, dto.SuccessResponse{Message: message, Data: data})
 }
+
+// respondPage writes a list response with pagination metadata so clients can
+// implement paging or infinite scrolling without a separate count request.
+func respondPage(c echo.Context, status int, message string, data interface{}, page, limit int, total int64) error {
+	return c.JSON(status, dto.SuccessResponse{
+		Message: message,
+		Data:    data,
+		Meta:    dto.NewPaginationMeta(page, limit, total),
+	})
+}
