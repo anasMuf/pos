@@ -3,45 +3,13 @@ import { useNavigate } from '@tanstack/react-router';
 import { useApp } from '../app/AppContext';
 import { useCreateOutlet, useCreateTenant, useCapabilityRegistry, useTenants } from '../../api/queries';
 import type { Capabilities } from '../../api/types';
-import { FALLBACK_CAPABILITIES, capabilitiesForPreset, emptyCapabilities } from '../../lib/capabilities';
+import { FALLBACK_CAPABILITIES, capabilitiesForPreset, emptyCapabilities, findCapabilityPreset, CAPABILITY_PRESETS } from '../../lib/capabilities';
 import { Card, PageHeader } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
-
-const PRESETS: Record<string, { label: string; capabilities: Partial<Capabilities> }> = {
-  retail: {
-    label: 'Retail / Distro',
-    capabilities: { enable_variants: true, enable_tiered_pricing: true },
-  },
-  fnb: {
-    label: 'F&B',
-    capabilities: { enable_variants: true, enable_modifiers: true },
-  },
-  print: {
-    label: 'Percetakan / Sablon',
-    capabilities: {
-      enable_variants: true,
-      enable_modifiers: true,
-      enable_dimension_pricing: true,
-      enable_tiered_pricing: true,
-      enable_order_workflow: true,
-      enable_partial_payment: true,
-    },
-  },
-  clothing: {
-    label: 'Clothing / Konveksi',
-    capabilities: {
-      enable_variants: true,
-      enable_modifiers: true,
-      enable_tiered_pricing: true,
-      enable_order_workflow: true,
-      enable_partial_payment: true,
-    },
-  },
-};
 
 export function NewOutletPage() {
   const navigate = useNavigate();
@@ -65,9 +33,7 @@ export function NewOutletPage() {
 
   const applyPreset = (value: string) => {
     setPreset(value);
-    setCapabilities(
-      capabilitiesForPreset(capabilityDefinitions, PRESETS[value]?.capabilities),
-    );
+    setCapabilities(capabilitiesForPreset(capabilityDefinitions, findCapabilityPreset(value)?.capabilities));
   };
 
   const resetCapabilities = () => {
@@ -224,8 +190,8 @@ export function NewOutletPage() {
                   onChange={(event) => applyPreset(event.target.value)}
                 >
                   <option value="">Pilih preset (opsional)</option>
-                  {Object.entries(PRESETS).map(([value, item]) => (
-                    <option key={value} value={value}>
+                  {CAPABILITY_PRESETS.map((item) => (
+                    <option key={item.key} value={item.key}>
                       {item.label}
                     </option>
                   ))}

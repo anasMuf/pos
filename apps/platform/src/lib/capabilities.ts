@@ -75,6 +75,53 @@ export function emptyCapabilities(definitions: CapabilityDefinition[]): Capabili
   return base;
 }
 
+export interface CapabilityPreset {
+  key: string;
+  label: string;
+  capabilities: Partial<Capabilities>;
+}
+
+/** Preset awal per jenis usaha. Satu sumber untuk form create & edit outlet. */
+export const CAPABILITY_PRESETS: CapabilityPreset[] = [
+  {
+    key: 'retail',
+    label: 'Retail / Distro',
+    capabilities: { enable_variants: true, enable_tiered_pricing: true },
+  },
+  {
+    key: 'fnb',
+    label: 'F&B',
+    capabilities: { enable_variants: true, enable_modifiers: true },
+  },
+  {
+    key: 'print',
+    label: 'Percetakan / Sablon',
+    capabilities: {
+      enable_variants: true,
+      enable_modifiers: true,
+      enable_dimension_pricing: true,
+      enable_tiered_pricing: true,
+      enable_order_workflow: true,
+      enable_partial_payment: true,
+    },
+  },
+  {
+    key: 'clothing',
+    label: 'Clothing / Konveksi',
+    capabilities: {
+      enable_variants: true,
+      enable_modifiers: true,
+      enable_tiered_pricing: true,
+      enable_order_workflow: true,
+      enable_partial_payment: true,
+    },
+  },
+];
+
+export function findCapabilityPreset(key: string): CapabilityPreset | undefined {
+  return CAPABILITY_PRESETS.find((preset) => preset.key === key);
+}
+
 /**
  * Resolve a preset against the capability defaults. Applying a preset always
  * replaces the current flags, so switching presets does not accumulate.

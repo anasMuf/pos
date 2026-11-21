@@ -7,7 +7,15 @@ import type { Capabilities } from '../../api/types';
 import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { useToast } from '../../components/molecules/Toast';
-import { FALLBACK_CAPABILITIES, emptyCapabilities } from '../../lib/capabilities';
+import { Select } from '../../components/atoms/Select';
+import { Label } from '../../components/atoms/Label';
+import {
+  FALLBACK_CAPABILITIES,
+  capabilitiesForPreset,
+  emptyCapabilities,
+  findCapabilityPreset,
+  CAPABILITY_PRESETS,
+} from '../../lib/capabilities';
 
 export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
@@ -20,6 +28,7 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   const [capabilities, setCapabilities] = useState<Capabilities>(() =>
     emptyCapabilities(FALLBACK_CAPABILITIES),
   );
+  const [preset, setPreset] = useState('');
 
   useEffect(() => {
     if (outlet) setCapabilities(outlet.capabilities);
@@ -35,6 +44,16 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   }
 
   if (isLoading) return <Spinner />;
+
+  const applyPreset = (value: string) => {
+    setPreset(value);
+    setCapabilities(capabilitiesForPreset(definitions, findCapabilityPreset(value)?.capabilities));
+  };
+
+  const resetCapabilities = () => {
+    setPreset('');
+    setCapabilities(capabilitiesForPreset(definitions));
+  };
 
   const handleSubmit = async () => {
     try {
@@ -67,6 +86,26 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
       />
 
       <Card>
+        <div className="mb-4 border-b border-gray-100 pb-4">
+          <Label htmlFor="capability-preset">Preset Capability</Label>
+          <div className="mt-1 flex gap-2">
+            <Select id="capability-preset" value={preset} onChange={(event) => applyPreset(event.target.value)}>
+              <option value="">Pilih preset (opsional)</option>
+              {CAPABILITY_PRESETS.map((item) => (
+                <option key={item.key} value={item.key}>
+                  {item.label}
+                </option>
+              ))}
+            </Select>
+            <Button type="button" variant="secondary" onClick={resetCapabilities}>
+              Reset
+            </Button>
+          </div>
+          <p className="mt-1 text-xs text-gray-500">
+            Preset menimpa flag yang ada. Reset mengosongkan semua capability.
+          </p>
+        </div>
+
         <div className="space-y-2">
           {definitions.map((item) => (
             <label key={item.key} className="flex items-start gap-3 rounded-md p-2 hover:bg-gray-50">
