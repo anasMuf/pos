@@ -12,7 +12,7 @@ export type GetUsersSearchParams = {
  */
 search?: string;
 /**
- * Maximum number of results (default 10, max 50)
+ * Maximum number of results (default 20, max 50)
  */
 limit?: number;
 };

@@ -2,9 +2,17 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
-import { useDeleteProduct, useProducts } from '../../api/queries';
+import { useDeleteProduct, useInfiniteProducts } from '../../api/queries';
 import type { Product } from '../../api/types';
-import { Badge, Card, EmptyState, PageHeader, Table } from '../../components/molecules/ui';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  InfiniteScrollSentinel,
+  PageHeader,
+  Spinner,
+  Table,
+} from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { ConfirmDialog } from '../../components/molecules/ConfirmDialog';
 import { useToast } from '../../components/molecules/Toast';
@@ -13,7 +21,15 @@ import { formatCurrency, formatNumber } from '../../lib/format';
 export function ProductsPage() {
   const { activeOutletId, activeOutlet, outlets, canManage } = useApp();
   const { addToast } = useToast();
-  const { data: products = [] } = useProducts(activeOutletId ?? undefined);
+  const {
+    data: productPages,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteProducts(activeOutletId ?? undefined);
+  const products = productPages?.pages.flatMap((page) => page.items) ?? [];
+  const totalProducts = productPages?.pages[0]?.meta.total;
   const deleteProduct = useDeleteProduct();
   const [toDelete, setToDelete] = useState<Product | null>(null);
 
@@ -67,7 +83,9 @@ export function ProductsPage() {
         }
       />
 
-      {products.length === 0 ? (
+      {isLoading ? (
+        <Spinner />
+      ) : products.length === 0 ? (
         <EmptyState
           title="Belum ada produk"
           description="Tambahkan produk pertama untuk outlet ini."
@@ -134,6 +152,13 @@ export function ProductsPage() {
               </tr>
             ))}
           </Table>
+          <InfiniteScrollSentinel
+            hasNextPage={!!hasNextPage}
+            isLoading={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            loadedCount={products.length}
+            total={totalProducts}
+          />
         </Card>
       )}
 

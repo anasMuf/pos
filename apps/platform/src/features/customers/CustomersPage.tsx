@@ -2,9 +2,17 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
-import { useCustomers, useDeleteCustomer, useOrders } from '../../api/queries';
+import { useDeleteCustomer, useInfiniteCustomers, useOrders } from '../../api/queries';
 import type { Customer, Order, PaymentStatus } from '../../api/types';
-import { Badge, Card, EmptyState, PageHeader, Table } from '../../components/molecules/ui';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  InfiniteScrollSentinel,
+  PageHeader,
+  Spinner,
+  Table,
+} from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { ConfirmDialog } from '../../components/molecules/ConfirmDialog';
@@ -22,10 +30,15 @@ export function CustomersPage() {
   const { activeOutletId, activeOutlet, outlets, canOperate, canManage } = useApp();
   const { addToast } = useToast();
   const [search, setSearch] = useState('');
-  const { data: customers = [] } = useCustomers(
-    activeOutletId ?? undefined,
-    search.trim() || undefined,
-  );
+  const {
+    data: customerPages,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteCustomers(activeOutletId ?? undefined, search.trim() || undefined);
+  const customers = customerPages?.pages.flatMap((page) => page.items) ?? [];
+  const totalCustomers = customerPages?.pages[0]?.meta.total;
   const deleteCustomer = useDeleteCustomer();
   const [selected, setSelected] = useState<Customer | null>(null);
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
@@ -96,7 +109,9 @@ export function CustomersPage() {
         />
       </div>
 
-      {customers.length === 0 ? (
+      {isLoading ? (
+        <Spinner />
+      ) : customers.length === 0 ? (
         <EmptyState
           title="Belum ada pelanggan"
           description="Tambahkan pelanggan untuk menyimpan catatan dan riwayat pesanan."
@@ -151,6 +166,13 @@ export function CustomersPage() {
               </tr>
             ))}
           </Table>
+          <InfiniteScrollSentinel
+            hasNextPage={!!hasNextPage}
+            isLoading={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            loadedCount={customers.length}
+            total={totalCustomers}
+          />
         </Card>
       )}
 

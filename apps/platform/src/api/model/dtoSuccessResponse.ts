@@ -5,9 +5,11 @@
  * Multi-tenant, multi-outlet, capability-driven POS API.
  * OpenAPI spec version: 1.0
  */
+import type { DtoPaginationMeta } from './dtoPaginationMeta';
 
 export interface DtoSuccessResponse {
   data?: unknown;
   message?: string;
+  meta?: DtoPaginationMeta;
   status?: number;
 }

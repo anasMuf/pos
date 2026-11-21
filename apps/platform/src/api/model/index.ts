@@ -10,6 +10,7 @@ export * from './dtoCreateUserRequest';
 export * from './dtoErrorResponse';
 export * from './dtoLoginUserRequest';
 export * from './dtoLoginUserResponse';
+export * from './dtoPaginationMeta';
 export * from './dtoSuccessResponse';
 export * from './dtoUserLookupResponse';
 export * from './getUsersSearch200';
