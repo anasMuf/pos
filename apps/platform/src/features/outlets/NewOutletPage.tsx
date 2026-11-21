@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, Link } from '@tanstack/react-router';
 import { useApp } from '../app/AppContext';
-import { useCreateOutlet, useCreateTenant, useCapabilityRegistry, useTenants } from '../../api/queries';
+import { useCreateOutlet, useCapabilityRegistry, useTenants } from '../../api/queries';
 import type { Capabilities } from '../../api/types';
 import { FALLBACK_CAPABILITIES, capabilitiesForPreset, emptyCapabilities, findCapabilityPreset, CAPABILITY_PRESETS } from '../../lib/capabilities';
 import { Card, PageHeader } from '../../components/molecules/ui';
@@ -18,7 +18,6 @@ export function NewOutletPage() {
   const { data: tenants = [] } = useTenants();
   const { data: registry } = useCapabilityRegistry();
   const capabilityDefinitions = registry ?? FALLBACK_CAPABILITIES;
-  const createTenant = useCreateTenant();
   const createOutlet = useCreateOutlet();
 
   const [tenantId, setTenantId] = useState('');
@@ -29,7 +28,6 @@ export function NewOutletPage() {
   const [capabilities, setCapabilities] = useState<Capabilities>(() =>
     emptyCapabilities(FALLBACK_CAPABILITIES),
   );
-  const [tenantForm, setTenantForm] = useState({ name: '', code: '' });
 
   const applyPreset = (value: string) => {
     setPreset(value);
@@ -39,29 +37,6 @@ export function NewOutletPage() {
   const resetCapabilities = () => {
     setPreset('');
     setCapabilities(capabilitiesForPreset(capabilityDefinitions));
-  };
-
-  const handleCreateTenant = async () => {
-    if (!tenantForm.name || !tenantForm.code) {
-      addToast({ variant: 'error', title: 'Data tenant belum lengkap', message: 'Nama dan kode tenant wajib diisi.' });
-      return;
-    }
-    try {
-      const tenant = await createTenant.mutateAsync({
-        name: tenantForm.name,
-        code: tenantForm.code,
-        status: 'active',
-      });
-      setTenantId(String(tenant.id));
-      setTenantForm({ name: '', code: '' });
-      addToast({ variant: 'success', title: 'Tenant dibuat', message: tenant.name });
-    } catch (error) {
-      addToast({
-        variant: 'error',
-        title: 'Gagal membuat tenant',
-        message: error instanceof Error ? error.message : 'Terjadi kesalahan.',
-      });
-    }
   };
 
   const handleSubmit = async () => {
@@ -98,35 +73,13 @@ export function NewOutletPage() {
       <PageHeader title="Buat Outlet" description="Pilih tenant, isi informasi outlet, dan aktifkan capability." />
 
       {tenants.length === 0 && (
-        <Card title="Tenant Baru" className="mb-6">
-          <p className="mb-3 text-sm text-gray-500">Belum ada tenant. Buat tenant terlebih dahulu.</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div>
-              <Label htmlFor="tenant-name">Nama Tenant</Label>
-              <Input
-                id="tenant-name"
-                value={tenantForm.name}
-                onChange={(event) => setTenantForm({ ...tenantForm, name: event.target.value })}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="tenant-code">Kode</Label>
-              <Input
-                id="tenant-code"
-                value={tenantForm.code}
-                onChange={(event) => setTenantForm({ ...tenantForm, code: event.target.value })}
-                className="mt-1"
-                placeholder="KNG-01"
-              />
-            </div>
-            <div className="flex items-end">
-              <Button type="button" onClick={handleCreateTenant} disabled={createTenant.isPending} className="w-full">
-                {createTenant.isPending ? 'Menyimpan...' : 'Buat Tenant'}
-              </Button>
-            </div>
-          </div>
-        </Card>
+        <div className="mb-6 rounded-md bg-amber-50 p-4 text-sm text-amber-800">
+          Belum ada tenant. Buat tenant terlebih dahulu di halaman{' '}
+          <Link to="/tenants/new" className="font-semibold underline">
+            Tenant
+          </Link>
+          .
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
