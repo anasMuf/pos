@@ -62,8 +62,10 @@ export function ConfirmDialog({
       <div className="flex min-h-full items-center justify-center p-4">
         {/* Dialog panel */}
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={title}
           className="relative w-full max-w-lg rounded-lg bg-white shadow-xl sm:w-md"
-          onClick={(e) => e.stopPropagation()}
         >
           <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="sm:flex sm:items-start">

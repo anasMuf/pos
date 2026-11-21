@@ -13,6 +13,40 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
+import { Route as AuthenticatedPosRouteImport } from './routes/_authenticated/pos'
+import { Route as AuthenticatedShiftsIndexRouteImport } from './routes/_authenticated/shifts/index'
+import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products/index'
+import { Route as AuthenticatedOutletsIndexRouteImport } from './routes/_authenticated/outlets/index'
+import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
+import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory/index'
+import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers/index'
+import { Route as AuthenticatedShiftsNewRouteImport } from './routes/_authenticated/shifts/new'
+import { Route as AuthenticatedShiftsIdRouteImport } from './routes/_authenticated/shifts/$id'
+import { Route as AuthenticatedProductsNewRouteImport } from './routes/_authenticated/products/new'
+import { Route as AuthenticatedProductsIdRouteImport } from './routes/_authenticated/products/$id'
+import { Route as AuthenticatedOutletsNewRouteImport } from './routes/_authenticated/outlets/new'
+import { Route as AuthenticatedOutletsIdRouteImport } from './routes/_authenticated/outlets/$id'
+import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders/$id'
+import { Route as AuthenticatedInventoryNewRouteImport } from './routes/_authenticated/inventory/new'
+import { Route as AuthenticatedCustomersNewRouteImport } from './routes/_authenticated/customers/new'
+import { Route as AuthenticatedCustomersIdRouteImport } from './routes/_authenticated/customers/$id'
+import { Route as AuthenticatedOutletsIdIndexRouteImport } from './routes/_authenticated/outlets/$id.index'
+import { Route as AuthenticatedShiftsIdCloseRouteImport } from './routes/_authenticated/shifts/$id.close'
+import { Route as AuthenticatedProductsIdVariantsRouteImport } from './routes/_authenticated/products/$id.variants'
+import { Route as AuthenticatedProductsIdEditRouteImport } from './routes/_authenticated/products/$id.edit'
+import { Route as AuthenticatedOutletsIdReceiptSettingsRouteImport } from './routes/_authenticated/outlets/$id.receipt-settings'
+import { Route as AuthenticatedOutletsIdMembersRouteImport } from './routes/_authenticated/outlets/$id.members'
+import { Route as AuthenticatedOutletsIdEditRouteImport } from './routes/_authenticated/outlets/$id.edit'
+import { Route as AuthenticatedOutletsIdCapabilitiesRouteImport } from './routes/_authenticated/outlets/$id.capabilities'
+import { Route as AuthenticatedOrdersIdPaymentRouteImport } from './routes/_authenticated/orders/$id.payment'
+import { Route as AuthenticatedCustomersIdEditRouteImport } from './routes/_authenticated/customers/$id.edit'
+import { Route as AuthenticatedProductsIdVariantsIndexRouteImport } from './routes/_authenticated/products/$id.variants.index'
+import { Route as AuthenticatedProductsIdVariantsNewRouteImport } from './routes/_authenticated/products/$id.variants.new'
+import { Route as AuthenticatedProductsIdVariantsVariantIdRouteImport } from './routes/_authenticated/products/$id.variants.$variantId'
+import { Route as AuthenticatedOutletsIdMembersNewRouteImport } from './routes/_authenticated/outlets/$id.members.new'
+import { Route as AuthenticatedProductsIdVariantsVariantIdEditRouteImport } from './routes/_authenticated/products/$id.variants.$variantId.edit'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -33,35 +67,436 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPosRoute = AuthenticatedPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedShiftsIndexRoute =
+  AuthenticatedShiftsIndexRouteImport.update({
+    id: '/shifts/',
+    path: '/shifts/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedProductsIndexRoute =
+  AuthenticatedProductsIndexRouteImport.update({
+    id: '/products/',
+    path: '/products/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOutletsIndexRoute =
+  AuthenticatedOutletsIndexRouteImport.update({
+    id: '/outlets/',
+    path: '/outlets/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOrdersIndexRoute =
+  AuthenticatedOrdersIndexRouteImport.update({
+    id: '/orders/',
+    path: '/orders/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedInventoryIndexRoute =
+  AuthenticatedInventoryIndexRouteImport.update({
+    id: '/inventory/',
+    path: '/inventory/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCustomersIndexRoute =
+  AuthenticatedCustomersIndexRouteImport.update({
+    id: '/customers/',
+    path: '/customers/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedShiftsNewRoute = AuthenticatedShiftsNewRouteImport.update({
+  id: '/shifts/new',
+  path: '/shifts/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedShiftsIdRoute = AuthenticatedShiftsIdRouteImport.update({
+  id: '/shifts/$id',
+  path: '/shifts/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProductsNewRoute =
+  AuthenticatedProductsNewRouteImport.update({
+    id: '/products/new',
+    path: '/products/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedProductsIdRoute = AuthenticatedProductsIdRouteImport.update({
+  id: '/products/$id',
+  path: '/products/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedOutletsNewRoute = AuthenticatedOutletsNewRouteImport.update({
+  id: '/outlets/new',
+  path: '/outlets/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedOutletsIdRoute = AuthenticatedOutletsIdRouteImport.update({
+  id: '/outlets/$id',
+  path: '/outlets/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedOrdersIdRoute = AuthenticatedOrdersIdRouteImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedInventoryNewRoute =
+  AuthenticatedInventoryNewRouteImport.update({
+    id: '/inventory/new',
+    path: '/inventory/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCustomersNewRoute =
+  AuthenticatedCustomersNewRouteImport.update({
+    id: '/customers/new',
+    path: '/customers/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCustomersIdRoute =
+  AuthenticatedCustomersIdRouteImport.update({
+    id: '/customers/$id',
+    path: '/customers/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedOutletsIdIndexRoute =
+  AuthenticatedOutletsIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedOutletsIdRoute,
+  } as any)
+const AuthenticatedShiftsIdCloseRoute =
+  AuthenticatedShiftsIdCloseRouteImport.update({
+    id: '/close',
+    path: '/close',
+    getParentRoute: () => AuthenticatedShiftsIdRoute,
+  } as any)
+const AuthenticatedProductsIdVariantsRoute =
+  AuthenticatedProductsIdVariantsRouteImport.update({
+    id: '/variants',
+    path: '/variants',
+    getParentRoute: () => AuthenticatedProductsIdRoute,
+  } as any)
+const AuthenticatedProductsIdEditRoute =
+  AuthenticatedProductsIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedProductsIdRoute,
+  } as any)
+const AuthenticatedOutletsIdReceiptSettingsRoute =
+  AuthenticatedOutletsIdReceiptSettingsRouteImport.update({
+    id: '/receipt-settings',
+    path: '/receipt-settings',
+    getParentRoute: () => AuthenticatedOutletsIdRoute,
+  } as any)
+const AuthenticatedOutletsIdMembersRoute =
+  AuthenticatedOutletsIdMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => AuthenticatedOutletsIdRoute,
+  } as any)
+const AuthenticatedOutletsIdEditRoute =
+  AuthenticatedOutletsIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedOutletsIdRoute,
+  } as any)
+const AuthenticatedOutletsIdCapabilitiesRoute =
+  AuthenticatedOutletsIdCapabilitiesRouteImport.update({
+    id: '/capabilities',
+    path: '/capabilities',
+    getParentRoute: () => AuthenticatedOutletsIdRoute,
+  } as any)
+const AuthenticatedOrdersIdPaymentRoute =
+  AuthenticatedOrdersIdPaymentRouteImport.update({
+    id: '/payment',
+    path: '/payment',
+    getParentRoute: () => AuthenticatedOrdersIdRoute,
+  } as any)
+const AuthenticatedCustomersIdEditRoute =
+  AuthenticatedCustomersIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedCustomersIdRoute,
+  } as any)
+const AuthenticatedProductsIdVariantsIndexRoute =
+  AuthenticatedProductsIdVariantsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedProductsIdVariantsRoute,
+  } as any)
+const AuthenticatedProductsIdVariantsNewRoute =
+  AuthenticatedProductsIdVariantsNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedProductsIdVariantsRoute,
+  } as any)
+const AuthenticatedProductsIdVariantsVariantIdRoute =
+  AuthenticatedProductsIdVariantsVariantIdRouteImport.update({
+    id: '/$variantId',
+    path: '/$variantId',
+    getParentRoute: () => AuthenticatedProductsIdVariantsRoute,
+  } as any)
+const AuthenticatedOutletsIdMembersNewRoute =
+  AuthenticatedOutletsIdMembersNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedOutletsIdMembersRoute,
+  } as any)
+const AuthenticatedProductsIdVariantsVariantIdEditRoute =
+  AuthenticatedProductsIdVariantsVariantIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedProductsIdVariantsVariantIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/pos': typeof AuthenticatedPosRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/customers/$id': typeof AuthenticatedCustomersIdRouteWithChildren
+  '/customers/new': typeof AuthenticatedCustomersNewRoute
+  '/inventory/new': typeof AuthenticatedInventoryNewRoute
+  '/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
+  '/outlets/$id': typeof AuthenticatedOutletsIdRouteWithChildren
+  '/outlets/new': typeof AuthenticatedOutletsNewRoute
+  '/products/$id': typeof AuthenticatedProductsIdRouteWithChildren
+  '/products/new': typeof AuthenticatedProductsNewRoute
+  '/shifts/$id': typeof AuthenticatedShiftsIdRouteWithChildren
+  '/shifts/new': typeof AuthenticatedShiftsNewRoute
+  '/customers/': typeof AuthenticatedCustomersIndexRoute
+  '/inventory/': typeof AuthenticatedInventoryIndexRoute
+  '/orders/': typeof AuthenticatedOrdersIndexRoute
+  '/outlets/': typeof AuthenticatedOutletsIndexRoute
+  '/products/': typeof AuthenticatedProductsIndexRoute
+  '/shifts/': typeof AuthenticatedShiftsIndexRoute
+  '/customers/$id/edit': typeof AuthenticatedCustomersIdEditRoute
+  '/orders/$id/payment': typeof AuthenticatedOrdersIdPaymentRoute
+  '/outlets/$id/capabilities': typeof AuthenticatedOutletsIdCapabilitiesRoute
+  '/outlets/$id/edit': typeof AuthenticatedOutletsIdEditRoute
+  '/outlets/$id/members': typeof AuthenticatedOutletsIdMembersRouteWithChildren
+  '/outlets/$id/receipt-settings': typeof AuthenticatedOutletsIdReceiptSettingsRoute
+  '/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
+  '/products/$id/variants': typeof AuthenticatedProductsIdVariantsRouteWithChildren
+  '/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
+  '/outlets/$id/': typeof AuthenticatedOutletsIdIndexRoute
+  '/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
+  '/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
+  '/products/$id/variants/new': typeof AuthenticatedProductsIdVariantsNewRoute
+  '/products/$id/variants/': typeof AuthenticatedProductsIdVariantsIndexRoute
+  '/products/$id/variants/$variantId/edit': typeof AuthenticatedProductsIdVariantsVariantIdEditRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/pos': typeof AuthenticatedPosRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
+  '/customers/$id': typeof AuthenticatedCustomersIdRouteWithChildren
+  '/customers/new': typeof AuthenticatedCustomersNewRoute
+  '/inventory/new': typeof AuthenticatedInventoryNewRoute
+  '/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
+  '/outlets/new': typeof AuthenticatedOutletsNewRoute
+  '/products/$id': typeof AuthenticatedProductsIdRouteWithChildren
+  '/products/new': typeof AuthenticatedProductsNewRoute
+  '/shifts/$id': typeof AuthenticatedShiftsIdRouteWithChildren
+  '/shifts/new': typeof AuthenticatedShiftsNewRoute
+  '/customers': typeof AuthenticatedCustomersIndexRoute
+  '/inventory': typeof AuthenticatedInventoryIndexRoute
+  '/orders': typeof AuthenticatedOrdersIndexRoute
+  '/outlets': typeof AuthenticatedOutletsIndexRoute
+  '/products': typeof AuthenticatedProductsIndexRoute
+  '/shifts': typeof AuthenticatedShiftsIndexRoute
+  '/customers/$id/edit': typeof AuthenticatedCustomersIdEditRoute
+  '/orders/$id/payment': typeof AuthenticatedOrdersIdPaymentRoute
+  '/outlets/$id/capabilities': typeof AuthenticatedOutletsIdCapabilitiesRoute
+  '/outlets/$id/edit': typeof AuthenticatedOutletsIdEditRoute
+  '/outlets/$id/members': typeof AuthenticatedOutletsIdMembersRouteWithChildren
+  '/outlets/$id/receipt-settings': typeof AuthenticatedOutletsIdReceiptSettingsRoute
+  '/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
+  '/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
+  '/outlets/$id': typeof AuthenticatedOutletsIdIndexRoute
+  '/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
+  '/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
+  '/products/$id/variants/new': typeof AuthenticatedProductsIdVariantsNewRoute
+  '/products/$id/variants': typeof AuthenticatedProductsIdVariantsIndexRoute
+  '/products/$id/variants/$variantId/edit': typeof AuthenticatedProductsIdVariantsVariantIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_authenticated/pos': typeof AuthenticatedPosRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/customers/$id': typeof AuthenticatedCustomersIdRouteWithChildren
+  '/_authenticated/customers/new': typeof AuthenticatedCustomersNewRoute
+  '/_authenticated/inventory/new': typeof AuthenticatedInventoryNewRoute
+  '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRouteWithChildren
+  '/_authenticated/outlets/$id': typeof AuthenticatedOutletsIdRouteWithChildren
+  '/_authenticated/outlets/new': typeof AuthenticatedOutletsNewRoute
+  '/_authenticated/products/$id': typeof AuthenticatedProductsIdRouteWithChildren
+  '/_authenticated/products/new': typeof AuthenticatedProductsNewRoute
+  '/_authenticated/shifts/$id': typeof AuthenticatedShiftsIdRouteWithChildren
+  '/_authenticated/shifts/new': typeof AuthenticatedShiftsNewRoute
+  '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
+  '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
+  '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
+  '/_authenticated/outlets/': typeof AuthenticatedOutletsIndexRoute
+  '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
+  '/_authenticated/shifts/': typeof AuthenticatedShiftsIndexRoute
+  '/_authenticated/customers/$id/edit': typeof AuthenticatedCustomersIdEditRoute
+  '/_authenticated/orders/$id/payment': typeof AuthenticatedOrdersIdPaymentRoute
+  '/_authenticated/outlets/$id/capabilities': typeof AuthenticatedOutletsIdCapabilitiesRoute
+  '/_authenticated/outlets/$id/edit': typeof AuthenticatedOutletsIdEditRoute
+  '/_authenticated/outlets/$id/members': typeof AuthenticatedOutletsIdMembersRouteWithChildren
+  '/_authenticated/outlets/$id/receipt-settings': typeof AuthenticatedOutletsIdReceiptSettingsRoute
+  '/_authenticated/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
+  '/_authenticated/products/$id/variants': typeof AuthenticatedProductsIdVariantsRouteWithChildren
+  '/_authenticated/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
+  '/_authenticated/outlets/$id/': typeof AuthenticatedOutletsIdIndexRoute
+  '/_authenticated/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
+  '/_authenticated/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
+  '/_authenticated/products/$id/variants/new': typeof AuthenticatedProductsIdVariantsNewRoute
+  '/_authenticated/products/$id/variants/': typeof AuthenticatedProductsIdVariantsIndexRoute
+  '/_authenticated/products/$id/variants/$variantId/edit': typeof AuthenticatedProductsIdVariantsVariantIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/pos'
+    | '/reports'
+    | '/settings'
+    | '/customers/$id'
+    | '/customers/new'
+    | '/inventory/new'
+    | '/orders/$id'
+    | '/outlets/$id'
+    | '/outlets/new'
+    | '/products/$id'
+    | '/products/new'
+    | '/shifts/$id'
+    | '/shifts/new'
+    | '/customers/'
+    | '/inventory/'
+    | '/orders/'
+    | '/outlets/'
+    | '/products/'
+    | '/shifts/'
+    | '/customers/$id/edit'
+    | '/orders/$id/payment'
+    | '/outlets/$id/capabilities'
+    | '/outlets/$id/edit'
+    | '/outlets/$id/members'
+    | '/outlets/$id/receipt-settings'
+    | '/products/$id/edit'
+    | '/products/$id/variants'
+    | '/shifts/$id/close'
+    | '/outlets/$id/'
+    | '/outlets/$id/members/new'
+    | '/products/$id/variants/$variantId'
+    | '/products/$id/variants/new'
+    | '/products/$id/variants/'
+    | '/products/$id/variants/$variantId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/'
+  to:
+    | '/login'
+    | '/register'
+    | '/pos'
+    | '/reports'
+    | '/settings'
+    | '/'
+    | '/customers/$id'
+    | '/customers/new'
+    | '/inventory/new'
+    | '/orders/$id'
+    | '/outlets/new'
+    | '/products/$id'
+    | '/products/new'
+    | '/shifts/$id'
+    | '/shifts/new'
+    | '/customers'
+    | '/inventory'
+    | '/orders'
+    | '/outlets'
+    | '/products'
+    | '/shifts'
+    | '/customers/$id/edit'
+    | '/orders/$id/payment'
+    | '/outlets/$id/capabilities'
+    | '/outlets/$id/edit'
+    | '/outlets/$id/members'
+    | '/outlets/$id/receipt-settings'
+    | '/products/$id/edit'
+    | '/shifts/$id/close'
+    | '/outlets/$id'
+    | '/outlets/$id/members/new'
+    | '/products/$id/variants/$variantId'
+    | '/products/$id/variants/new'
+    | '/products/$id/variants'
+    | '/products/$id/variants/$variantId/edit'
   id:
     | '__root__'
     | '/_authenticated'
     | '/login'
     | '/register'
+    | '/_authenticated/pos'
+    | '/_authenticated/reports'
+    | '/_authenticated/settings'
     | '/_authenticated/'
+    | '/_authenticated/customers/$id'
+    | '/_authenticated/customers/new'
+    | '/_authenticated/inventory/new'
+    | '/_authenticated/orders/$id'
+    | '/_authenticated/outlets/$id'
+    | '/_authenticated/outlets/new'
+    | '/_authenticated/products/$id'
+    | '/_authenticated/products/new'
+    | '/_authenticated/shifts/$id'
+    | '/_authenticated/shifts/new'
+    | '/_authenticated/customers/'
+    | '/_authenticated/inventory/'
+    | '/_authenticated/orders/'
+    | '/_authenticated/outlets/'
+    | '/_authenticated/products/'
+    | '/_authenticated/shifts/'
+    | '/_authenticated/customers/$id/edit'
+    | '/_authenticated/orders/$id/payment'
+    | '/_authenticated/outlets/$id/capabilities'
+    | '/_authenticated/outlets/$id/edit'
+    | '/_authenticated/outlets/$id/members'
+    | '/_authenticated/outlets/$id/receipt-settings'
+    | '/_authenticated/products/$id/edit'
+    | '/_authenticated/products/$id/variants'
+    | '/_authenticated/shifts/$id/close'
+    | '/_authenticated/outlets/$id/'
+    | '/_authenticated/outlets/$id/members/new'
+    | '/_authenticated/products/$id/variants/$variantId'
+    | '/_authenticated/products/$id/variants/new'
+    | '/_authenticated/products/$id/variants/'
+    | '/_authenticated/products/$id/variants/$variantId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -100,15 +535,424 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pos': {
+      id: '/_authenticated/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof AuthenticatedPosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/shifts/': {
+      id: '/_authenticated/shifts/'
+      path: '/shifts'
+      fullPath: '/shifts/'
+      preLoaderRoute: typeof AuthenticatedShiftsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/products/': {
+      id: '/_authenticated/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AuthenticatedProductsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/outlets/': {
+      id: '/_authenticated/outlets/'
+      path: '/outlets'
+      fullPath: '/outlets/'
+      preLoaderRoute: typeof AuthenticatedOutletsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/orders/': {
+      id: '/_authenticated/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AuthenticatedOrdersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/inventory/': {
+      id: '/_authenticated/inventory/'
+      path: '/inventory'
+      fullPath: '/inventory/'
+      preLoaderRoute: typeof AuthenticatedInventoryIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/customers/': {
+      id: '/_authenticated/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof AuthenticatedCustomersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/shifts/new': {
+      id: '/_authenticated/shifts/new'
+      path: '/shifts/new'
+      fullPath: '/shifts/new'
+      preLoaderRoute: typeof AuthenticatedShiftsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/shifts/$id': {
+      id: '/_authenticated/shifts/$id'
+      path: '/shifts/$id'
+      fullPath: '/shifts/$id'
+      preLoaderRoute: typeof AuthenticatedShiftsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/products/new': {
+      id: '/_authenticated/products/new'
+      path: '/products/new'
+      fullPath: '/products/new'
+      preLoaderRoute: typeof AuthenticatedProductsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/products/$id': {
+      id: '/_authenticated/products/$id'
+      path: '/products/$id'
+      fullPath: '/products/$id'
+      preLoaderRoute: typeof AuthenticatedProductsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/outlets/new': {
+      id: '/_authenticated/outlets/new'
+      path: '/outlets/new'
+      fullPath: '/outlets/new'
+      preLoaderRoute: typeof AuthenticatedOutletsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/outlets/$id': {
+      id: '/_authenticated/outlets/$id'
+      path: '/outlets/$id'
+      fullPath: '/outlets/$id'
+      preLoaderRoute: typeof AuthenticatedOutletsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/orders/$id': {
+      id: '/_authenticated/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof AuthenticatedOrdersIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/inventory/new': {
+      id: '/_authenticated/inventory/new'
+      path: '/inventory/new'
+      fullPath: '/inventory/new'
+      preLoaderRoute: typeof AuthenticatedInventoryNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/customers/new': {
+      id: '/_authenticated/customers/new'
+      path: '/customers/new'
+      fullPath: '/customers/new'
+      preLoaderRoute: typeof AuthenticatedCustomersNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/customers/$id': {
+      id: '/_authenticated/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/customers/$id'
+      preLoaderRoute: typeof AuthenticatedCustomersIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/outlets/$id/': {
+      id: '/_authenticated/outlets/$id/'
+      path: '/'
+      fullPath: '/outlets/$id/'
+      preLoaderRoute: typeof AuthenticatedOutletsIdIndexRouteImport
+      parentRoute: typeof AuthenticatedOutletsIdRoute
+    }
+    '/_authenticated/shifts/$id/close': {
+      id: '/_authenticated/shifts/$id/close'
+      path: '/close'
+      fullPath: '/shifts/$id/close'
+      preLoaderRoute: typeof AuthenticatedShiftsIdCloseRouteImport
+      parentRoute: typeof AuthenticatedShiftsIdRoute
+    }
+    '/_authenticated/products/$id/variants': {
+      id: '/_authenticated/products/$id/variants'
+      path: '/variants'
+      fullPath: '/products/$id/variants'
+      preLoaderRoute: typeof AuthenticatedProductsIdVariantsRouteImport
+      parentRoute: typeof AuthenticatedProductsIdRoute
+    }
+    '/_authenticated/products/$id/edit': {
+      id: '/_authenticated/products/$id/edit'
+      path: '/edit'
+      fullPath: '/products/$id/edit'
+      preLoaderRoute: typeof AuthenticatedProductsIdEditRouteImport
+      parentRoute: typeof AuthenticatedProductsIdRoute
+    }
+    '/_authenticated/outlets/$id/receipt-settings': {
+      id: '/_authenticated/outlets/$id/receipt-settings'
+      path: '/receipt-settings'
+      fullPath: '/outlets/$id/receipt-settings'
+      preLoaderRoute: typeof AuthenticatedOutletsIdReceiptSettingsRouteImport
+      parentRoute: typeof AuthenticatedOutletsIdRoute
+    }
+    '/_authenticated/outlets/$id/members': {
+      id: '/_authenticated/outlets/$id/members'
+      path: '/members'
+      fullPath: '/outlets/$id/members'
+      preLoaderRoute: typeof AuthenticatedOutletsIdMembersRouteImport
+      parentRoute: typeof AuthenticatedOutletsIdRoute
+    }
+    '/_authenticated/outlets/$id/edit': {
+      id: '/_authenticated/outlets/$id/edit'
+      path: '/edit'
+      fullPath: '/outlets/$id/edit'
+      preLoaderRoute: typeof AuthenticatedOutletsIdEditRouteImport
+      parentRoute: typeof AuthenticatedOutletsIdRoute
+    }
+    '/_authenticated/outlets/$id/capabilities': {
+      id: '/_authenticated/outlets/$id/capabilities'
+      path: '/capabilities'
+      fullPath: '/outlets/$id/capabilities'
+      preLoaderRoute: typeof AuthenticatedOutletsIdCapabilitiesRouteImport
+      parentRoute: typeof AuthenticatedOutletsIdRoute
+    }
+    '/_authenticated/orders/$id/payment': {
+      id: '/_authenticated/orders/$id/payment'
+      path: '/payment'
+      fullPath: '/orders/$id/payment'
+      preLoaderRoute: typeof AuthenticatedOrdersIdPaymentRouteImport
+      parentRoute: typeof AuthenticatedOrdersIdRoute
+    }
+    '/_authenticated/customers/$id/edit': {
+      id: '/_authenticated/customers/$id/edit'
+      path: '/edit'
+      fullPath: '/customers/$id/edit'
+      preLoaderRoute: typeof AuthenticatedCustomersIdEditRouteImport
+      parentRoute: typeof AuthenticatedCustomersIdRoute
+    }
+    '/_authenticated/products/$id/variants/': {
+      id: '/_authenticated/products/$id/variants/'
+      path: '/'
+      fullPath: '/products/$id/variants/'
+      preLoaderRoute: typeof AuthenticatedProductsIdVariantsIndexRouteImport
+      parentRoute: typeof AuthenticatedProductsIdVariantsRoute
+    }
+    '/_authenticated/products/$id/variants/new': {
+      id: '/_authenticated/products/$id/variants/new'
+      path: '/new'
+      fullPath: '/products/$id/variants/new'
+      preLoaderRoute: typeof AuthenticatedProductsIdVariantsNewRouteImport
+      parentRoute: typeof AuthenticatedProductsIdVariantsRoute
+    }
+    '/_authenticated/products/$id/variants/$variantId': {
+      id: '/_authenticated/products/$id/variants/$variantId'
+      path: '/$variantId'
+      fullPath: '/products/$id/variants/$variantId'
+      preLoaderRoute: typeof AuthenticatedProductsIdVariantsVariantIdRouteImport
+      parentRoute: typeof AuthenticatedProductsIdVariantsRoute
+    }
+    '/_authenticated/outlets/$id/members/new': {
+      id: '/_authenticated/outlets/$id/members/new'
+      path: '/new'
+      fullPath: '/outlets/$id/members/new'
+      preLoaderRoute: typeof AuthenticatedOutletsIdMembersNewRouteImport
+      parentRoute: typeof AuthenticatedOutletsIdMembersRoute
+    }
+    '/_authenticated/products/$id/variants/$variantId/edit': {
+      id: '/_authenticated/products/$id/variants/$variantId/edit'
+      path: '/edit'
+      fullPath: '/products/$id/variants/$variantId/edit'
+      preLoaderRoute: typeof AuthenticatedProductsIdVariantsVariantIdEditRouteImport
+      parentRoute: typeof AuthenticatedProductsIdVariantsVariantIdRoute
+    }
   }
 }
 
+interface AuthenticatedCustomersIdRouteChildren {
+  AuthenticatedCustomersIdEditRoute: typeof AuthenticatedCustomersIdEditRoute
+}
+
+const AuthenticatedCustomersIdRouteChildren: AuthenticatedCustomersIdRouteChildren =
+  {
+    AuthenticatedCustomersIdEditRoute: AuthenticatedCustomersIdEditRoute,
+  }
+
+const AuthenticatedCustomersIdRouteWithChildren =
+  AuthenticatedCustomersIdRoute._addFileChildren(
+    AuthenticatedCustomersIdRouteChildren,
+  )
+
+interface AuthenticatedOrdersIdRouteChildren {
+  AuthenticatedOrdersIdPaymentRoute: typeof AuthenticatedOrdersIdPaymentRoute
+}
+
+const AuthenticatedOrdersIdRouteChildren: AuthenticatedOrdersIdRouteChildren = {
+  AuthenticatedOrdersIdPaymentRoute: AuthenticatedOrdersIdPaymentRoute,
+}
+
+const AuthenticatedOrdersIdRouteWithChildren =
+  AuthenticatedOrdersIdRoute._addFileChildren(
+    AuthenticatedOrdersIdRouteChildren,
+  )
+
+interface AuthenticatedOutletsIdMembersRouteChildren {
+  AuthenticatedOutletsIdMembersNewRoute: typeof AuthenticatedOutletsIdMembersNewRoute
+}
+
+const AuthenticatedOutletsIdMembersRouteChildren: AuthenticatedOutletsIdMembersRouteChildren =
+  {
+    AuthenticatedOutletsIdMembersNewRoute:
+      AuthenticatedOutletsIdMembersNewRoute,
+  }
+
+const AuthenticatedOutletsIdMembersRouteWithChildren =
+  AuthenticatedOutletsIdMembersRoute._addFileChildren(
+    AuthenticatedOutletsIdMembersRouteChildren,
+  )
+
+interface AuthenticatedOutletsIdRouteChildren {
+  AuthenticatedOutletsIdCapabilitiesRoute: typeof AuthenticatedOutletsIdCapabilitiesRoute
+  AuthenticatedOutletsIdEditRoute: typeof AuthenticatedOutletsIdEditRoute
+  AuthenticatedOutletsIdMembersRoute: typeof AuthenticatedOutletsIdMembersRouteWithChildren
+  AuthenticatedOutletsIdReceiptSettingsRoute: typeof AuthenticatedOutletsIdReceiptSettingsRoute
+  AuthenticatedOutletsIdIndexRoute: typeof AuthenticatedOutletsIdIndexRoute
+}
+
+const AuthenticatedOutletsIdRouteChildren: AuthenticatedOutletsIdRouteChildren =
+  {
+    AuthenticatedOutletsIdCapabilitiesRoute:
+      AuthenticatedOutletsIdCapabilitiesRoute,
+    AuthenticatedOutletsIdEditRoute: AuthenticatedOutletsIdEditRoute,
+    AuthenticatedOutletsIdMembersRoute:
+      AuthenticatedOutletsIdMembersRouteWithChildren,
+    AuthenticatedOutletsIdReceiptSettingsRoute:
+      AuthenticatedOutletsIdReceiptSettingsRoute,
+    AuthenticatedOutletsIdIndexRoute: AuthenticatedOutletsIdIndexRoute,
+  }
+
+const AuthenticatedOutletsIdRouteWithChildren =
+  AuthenticatedOutletsIdRoute._addFileChildren(
+    AuthenticatedOutletsIdRouteChildren,
+  )
+
+interface AuthenticatedProductsIdVariantsVariantIdRouteChildren {
+  AuthenticatedProductsIdVariantsVariantIdEditRoute: typeof AuthenticatedProductsIdVariantsVariantIdEditRoute
+}
+
+const AuthenticatedProductsIdVariantsVariantIdRouteChildren: AuthenticatedProductsIdVariantsVariantIdRouteChildren =
+  {
+    AuthenticatedProductsIdVariantsVariantIdEditRoute:
+      AuthenticatedProductsIdVariantsVariantIdEditRoute,
+  }
+
+const AuthenticatedProductsIdVariantsVariantIdRouteWithChildren =
+  AuthenticatedProductsIdVariantsVariantIdRoute._addFileChildren(
+    AuthenticatedProductsIdVariantsVariantIdRouteChildren,
+  )
+
+interface AuthenticatedProductsIdVariantsRouteChildren {
+  AuthenticatedProductsIdVariantsVariantIdRoute: typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
+  AuthenticatedProductsIdVariantsNewRoute: typeof AuthenticatedProductsIdVariantsNewRoute
+  AuthenticatedProductsIdVariantsIndexRoute: typeof AuthenticatedProductsIdVariantsIndexRoute
+}
+
+const AuthenticatedProductsIdVariantsRouteChildren: AuthenticatedProductsIdVariantsRouteChildren =
+  {
+    AuthenticatedProductsIdVariantsVariantIdRoute:
+      AuthenticatedProductsIdVariantsVariantIdRouteWithChildren,
+    AuthenticatedProductsIdVariantsNewRoute:
+      AuthenticatedProductsIdVariantsNewRoute,
+    AuthenticatedProductsIdVariantsIndexRoute:
+      AuthenticatedProductsIdVariantsIndexRoute,
+  }
+
+const AuthenticatedProductsIdVariantsRouteWithChildren =
+  AuthenticatedProductsIdVariantsRoute._addFileChildren(
+    AuthenticatedProductsIdVariantsRouteChildren,
+  )
+
+interface AuthenticatedProductsIdRouteChildren {
+  AuthenticatedProductsIdEditRoute: typeof AuthenticatedProductsIdEditRoute
+  AuthenticatedProductsIdVariantsRoute: typeof AuthenticatedProductsIdVariantsRouteWithChildren
+}
+
+const AuthenticatedProductsIdRouteChildren: AuthenticatedProductsIdRouteChildren =
+  {
+    AuthenticatedProductsIdEditRoute: AuthenticatedProductsIdEditRoute,
+    AuthenticatedProductsIdVariantsRoute:
+      AuthenticatedProductsIdVariantsRouteWithChildren,
+  }
+
+const AuthenticatedProductsIdRouteWithChildren =
+  AuthenticatedProductsIdRoute._addFileChildren(
+    AuthenticatedProductsIdRouteChildren,
+  )
+
+interface AuthenticatedShiftsIdRouteChildren {
+  AuthenticatedShiftsIdCloseRoute: typeof AuthenticatedShiftsIdCloseRoute
+}
+
+const AuthenticatedShiftsIdRouteChildren: AuthenticatedShiftsIdRouteChildren = {
+  AuthenticatedShiftsIdCloseRoute: AuthenticatedShiftsIdCloseRoute,
+}
+
+const AuthenticatedShiftsIdRouteWithChildren =
+  AuthenticatedShiftsIdRoute._addFileChildren(
+    AuthenticatedShiftsIdRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
+  AuthenticatedPosRoute: typeof AuthenticatedPosRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedCustomersIdRoute: typeof AuthenticatedCustomersIdRouteWithChildren
+  AuthenticatedCustomersNewRoute: typeof AuthenticatedCustomersNewRoute
+  AuthenticatedInventoryNewRoute: typeof AuthenticatedInventoryNewRoute
+  AuthenticatedOrdersIdRoute: typeof AuthenticatedOrdersIdRouteWithChildren
+  AuthenticatedOutletsIdRoute: typeof AuthenticatedOutletsIdRouteWithChildren
+  AuthenticatedOutletsNewRoute: typeof AuthenticatedOutletsNewRoute
+  AuthenticatedProductsIdRoute: typeof AuthenticatedProductsIdRouteWithChildren
+  AuthenticatedProductsNewRoute: typeof AuthenticatedProductsNewRoute
+  AuthenticatedShiftsIdRoute: typeof AuthenticatedShiftsIdRouteWithChildren
+  AuthenticatedShiftsNewRoute: typeof AuthenticatedShiftsNewRoute
+  AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
+  AuthenticatedInventoryIndexRoute: typeof AuthenticatedInventoryIndexRoute
+  AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
+  AuthenticatedOutletsIndexRoute: typeof AuthenticatedOutletsIndexRoute
+  AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
+  AuthenticatedShiftsIndexRoute: typeof AuthenticatedShiftsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedPosRoute: AuthenticatedPosRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedCustomersIdRoute: AuthenticatedCustomersIdRouteWithChildren,
+  AuthenticatedCustomersNewRoute: AuthenticatedCustomersNewRoute,
+  AuthenticatedInventoryNewRoute: AuthenticatedInventoryNewRoute,
+  AuthenticatedOrdersIdRoute: AuthenticatedOrdersIdRouteWithChildren,
+  AuthenticatedOutletsIdRoute: AuthenticatedOutletsIdRouteWithChildren,
+  AuthenticatedOutletsNewRoute: AuthenticatedOutletsNewRoute,
+  AuthenticatedProductsIdRoute: AuthenticatedProductsIdRouteWithChildren,
+  AuthenticatedProductsNewRoute: AuthenticatedProductsNewRoute,
+  AuthenticatedShiftsIdRoute: AuthenticatedShiftsIdRouteWithChildren,
+  AuthenticatedShiftsNewRoute: AuthenticatedShiftsNewRoute,
+  AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
+  AuthenticatedInventoryIndexRoute: AuthenticatedInventoryIndexRoute,
+  AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
+  AuthenticatedOutletsIndexRoute: AuthenticatedOutletsIndexRoute,
+  AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
+  AuthenticatedShiftsIndexRoute: AuthenticatedShiftsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

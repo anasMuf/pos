@@ -24,6 +24,27 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/tenants": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "tenants"
+                ],
+                "summary": "List tenants",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -167,21 +188,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "full_name": {
                     "type": "string",
+                    "maxLength": 100,
                     "minLength": 3
                 },
                 "password": {
                     "type": "string",
+                    "maxLength": 100,
                     "minLength": 6
                 },
                 "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 15
                 },
                 "username": {
                     "type": "string",
+                    "maxLength": 50,
                     "minLength": 3
                 }
             }
@@ -252,8 +278,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "Starter Kit API",
-	Description:      "Ini adalah API starter kit menggunakan Echo Go.",
+	Title:            "Universal Multi-Capability POS API",
+	Description:      "Multi-tenant, multi-outlet, capability-driven POS API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,0 +1,170 @@
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { ArrowLeft } from 'lucide-react';
+import { useApp } from '../app/AppContext';
+import { useCreateVariant, useProduct, useUpdateVariant, useVariants } from '../../api/queries';
+import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { Button } from '../../components/atoms/Button';
+import { Input } from '../../components/atoms/Input';
+import { Label } from '../../components/atoms/Label';
+import { useToast } from '../../components/molecules/Toast';
+
+const EMPTY_FORM = { name: '', sku: '', barcode: '', price_override: '', stock_qty: '0' };
+
+export function VariantFormPage({
+  productId,
+  variantId,
+}: {
+  productId: number;
+  variantId?: number;
+}) {
+  const navigate = useNavigate();
+  const { addToast } = useToast();
+  const { canManage } = useApp();
+  const { data: product, isLoading: isLoadingProduct } = useProduct(productId);
+  const { data: variants = [], isLoading: isLoadingVariants } = useVariants(productId);
+  const createVariant = useCreateVariant(productId);
+  const updateVariant = useUpdateVariant(productId);
+  const [form, setForm] = useState(EMPTY_FORM);
+
+  const variant = variantId ? variants.find((item) => item.id === variantId) : undefined;
+
+  useEffect(() => {
+    if (!variant) return;
+    setForm({
+      name: variant.name,
+      sku: variant.sku,
+      barcode: variant.barcode ?? '',
+      price_override: variant.price_override > 0 ? String(variant.price_override) : '',
+      stock_qty: String(variant.stock_qty),
+    });
+  }, [variant]);
+
+  if (!canManage) {
+    return (
+      <div>
+        <PageHeader title="Varian" />
+        <AccessDenied message="Hanya pemilik atau pengelola outlet yang dapat mengubah varian." />
+      </div>
+    );
+  }
+
+  if (isLoadingProduct || (variantId && isLoadingVariants)) return <Spinner />;
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.sku) {
+      addToast({ variant: 'error', title: 'Data belum lengkap', message: 'Nama dan SKU varian wajib diisi.' });
+      return;
+    }
+    const payload = {
+      name: form.name,
+      sku: form.sku,
+      barcode: form.barcode || undefined,
+      price_override: form.price_override ? Number(form.price_override) : undefined,
+      stock_qty: Number(form.stock_qty) || 0,
+    };
+    try {
+      if (variantId) {
+        await updateVariant.mutateAsync({ id: variantId, ...payload });
+        addToast({ variant: 'success', title: 'Varian diperbarui', message: form.name });
+      } else {
+        await createVariant.mutateAsync(payload);
+        addToast({ variant: 'success', title: 'Varian ditambahkan', message: form.name });
+      }
+      navigate({ to: '/products/$id/variants', params: { id: String(productId) } });
+    } catch (error) {
+      addToast({
+        variant: 'error',
+        title: variantId ? 'Gagal memperbarui varian' : 'Gagal menambah varian',
+        message: error instanceof Error ? error.message : 'Terjadi kesalahan.',
+      });
+    }
+  };
+
+  const saving = createVariant.isPending || updateVariant.isPending;
+
+  return (
+    <div>
+      <PageHeader
+        title={variantId ? `Edit Varian${variant ? ` · ${variant.name}` : ''}` : 'Varian Baru'}
+        description={product ? `Produk ${product.name} · ${product.sku}` : undefined}
+        action={
+          <Link
+            to="/products/$id/variants"
+            params={{ id: String(productId) }}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+          >
+            <ArrowLeft className="h-4 w-4" /> Kembali
+          </Link>
+        }
+      />
+
+      <Card>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="variant-name">Nama</Label>
+            <Input
+              id="variant-name"
+              value={form.name}
+              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="variant-sku">SKU</Label>
+            <Input
+              id="variant-sku"
+              value={form.sku}
+              onChange={(event) => setForm({ ...form, sku: event.target.value })}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="variant-barcode">Barcode</Label>
+            <Input
+              id="variant-barcode"
+              value={form.barcode}
+              onChange={(event) => setForm({ ...form, barcode: event.target.value })}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="variant-price">Harga Khusus</Label>
+            <Input
+              id="variant-price"
+              type="number"
+              min={0}
+              value={form.price_override}
+              onChange={(event) => setForm({ ...form, price_override: event.target.value })}
+              className="mt-1"
+              placeholder="Kosongkan untuk harga produk"
+            />
+          </div>
+          <div>
+            <Label htmlFor="variant-stock">Stok</Label>
+            <Input
+              id="variant-stock"
+              type="number"
+              value={form.stock_qty}
+              onChange={(event) => setForm({ ...form, stock_qty: event.target.value })}
+              className="mt-1"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <Button type="button" onClick={handleSubmit} disabled={saving}>
+            {saving ? 'Menyimpan...' : variantId ? 'Simpan Perubahan' : 'Simpan Varian'}
+          </Button>
+          <Link
+            to="/products/$id/variants"
+            params={{ id: String(productId) }}
+            className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          >
+            Batal
+          </Link>
+        </div>
+      </Card>
+    </div>
+  );
+}
