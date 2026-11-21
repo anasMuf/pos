@@ -2433,10 +2433,22 @@ Response `200 OK`:
 ## Response Format
 
 ```json
-// Success (single / list)
+// Success (single)
 {
   "message": "Pesan deskriptif",
   "data": { ... }
+}
+
+// Success (list / paginated)
+{
+  "message": "Pesan deskriptif",
+  "data": [ ... ],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 57,
+    "has_more": true
+  }
 }
 
 // Error
@@ -2445,3 +2457,7 @@ Response `200 OK`:
 }
 
 ```
+
+`meta` hanya muncul pada endpoint list yang mendukung `page`/`limit` (tenants, outlets, products,
+customers, orders, stock movements, cash shifts). `has_more` dipakai frontend untuk *infinite scroll*,
+sehingga tidak perlu request `total` terpisah. `data` tetap berupa array agar klien lama tidak pecah.

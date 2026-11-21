@@ -99,12 +99,17 @@ Status terakhir diperbarui pada branch `feat/p0-ux-improvements`.
 | --- | --- | --- | --- |
 | U-01 Validasi inline | Setiap field wajib punya pesan error inline, `aria-invalid`, dan fokus otomatis ke field pertama yang gagal; toast tetap ada sebagai ringkasan | ✅ Selesai (fokus otomatis baru di form produk) | `components/atoms/FieldError.tsx`, `ProductFormPage`, `VariantFormPage`, `CustomerFormPage`, `OutletEditPage`, `InventoryMutationPage`, `OrderPaymentPage`, `ShiftOpenPage`, `ShiftClosePage` |
 | U-02 Error state halaman edit | ID tidak ditemukan/`403` menampilkan pesan + tombol kembali; tidak ada form kosong | ✅ Selesai | `EmptyState` di ProductForm, VariantForm, CustomerForm, OutletEdit, OutletCapabilities, ReceiptSettings, OutletMemberForm, ShiftClose, OrderPayment |
-| U-03 Pagination | Respons list menyertakan `meta {page, limit, total}` (update `docs/core/api-contract.md`) dan UI menampilkan navigasi halaman | ⬜ Belum | — |
+| U-03 Pagination | Respons list menyertakan `meta {page, limit, total, has_more}` (update `docs/core/api-contract.md`) dan UI menampilkan navigasi halaman | ✅ Selesai (infinite scroll, bukan navigasi halaman) | `dto.PaginationMeta` + `respondPage`, `apiGetPage`, `useInfiniteProducts/Customers/Orders`, `InfiniteScrollSentinel` di Produk/Pelanggan/Pesanan |
 | F-01 Editor pricing/modifier | Tidak ada textarea JSON; data tetap dikirim dengan bentuk yang sama | ✅ Selesai | `ProductFormPage` (tier/dimension/modifier editor) |
 | F-02 Pemilih anggota | Anggota dipilih dari daftar user (nama/email), bukan User ID | ✅ Selesai | `GET /api/users/search`, `useSearchUsers`, `OutletMemberFormPage` |
 | F-03 Mutasi stok | Produk → varian (opsional) → stok saat ini → jumlah → estimasi stok akhir | ✅ Selesai | `InventoryMutationPage` |
 | F-04 Kelola tenant | Tenant dapat dibuat/diedit/dihapus dari UI kapan pun | ✅ Selesai | `/tenants`, `/tenants/new`, `/tenants/$id`, `/tenants/$id/edit` |
 | F-05/F-06 Preset konsisten | Definisi preset satu sumber; form create & edit outlet punya preset + Reset | ✅ Selesai | `lib/capabilities.ts` (`CAPABILITY_PRESETS`), `NewOutletPage`, `OutletCapabilitiesPage` |
+
+Catatan implementasi U-03: list Produk, Pelanggan, dan Pesanan memakai *infinite scroll* (sentinel otomatis +
+tombol “Muat lebih banyak” sebagai fallback aksesibel). List outlet sengaja tetap dimuat penuh (`limit=100`)
+karena dipakai outlet switcher global dan jumlahnya kecil; POS/pelanggan juga memakai `limit=100` agar data
+referensi tidak terpotong default 10.
 
 ### P1 — efisiensi operasional
 
