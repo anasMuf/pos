@@ -18,6 +18,7 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
+import { FieldError } from '../../components/atoms/FieldError';
 import { formatCurrency, formatDateTime, formatNumber } from '../../lib/format';
 import { defaultReportRange } from '../../lib/reports';
 import { downloadCSV, toCSV } from '../../lib/csv';
@@ -29,10 +30,13 @@ export function ReportsPage() {
   const [to, setTo] = useState(initial.to);
   const [outletFilter, setOutletFilter] = useState('');
   const outletId = outletFilter ? Number(outletFilter) : undefined;
+  const rangeError =
+    from && to && from > to ? 'Tanggal "Dari" tidak boleh melewati tanggal "Sampai".' : '';
+  const queriesEnabled = canManage && !rangeError;
 
-  const summaryQuery = useReportSummary(from, to, outletId, canManage);
-  const reconQuery = useReconciliation(from, to, outletId, canManage);
-  const commissionQuery = useCommissionReport(from, to, outletId, canManage);
+  const summaryQuery = useReportSummary(from, to, outletId, queriesEnabled);
+  const reconQuery = useReconciliation(from, to, outletId, queriesEnabled);
+  const commissionQuery = useCommissionReport(from, to, outletId, queriesEnabled);
 
   const summary = summaryQuery.data;
   const recon = reconQuery.data;
@@ -179,6 +183,8 @@ export function ReportsPage() {
             value={from}
             onChange={(event) => setFrom(event.target.value)}
             className="mt-1"
+            aria-invalid={!!rangeError}
+            aria-describedby={rangeError ? 'report-range-error' : undefined}
           />
         </div>
         <div>
@@ -189,6 +195,8 @@ export function ReportsPage() {
             value={to}
             onChange={(event) => setTo(event.target.value)}
             className="mt-1"
+            aria-invalid={!!rangeError}
+            aria-describedby={rangeError ? 'report-range-error' : undefined}
           />
         </div>
         <div>
@@ -209,9 +217,20 @@ export function ReportsPage() {
         </div>
       </div>
 
+      {rangeError && (
+        <div className="mb-6">
+          <FieldError id="report-range-error" message={rangeError} />
+        </div>
+      )}
+
       {summaryQuery.isError && <ErrorAlert message="Gagal memuat ringkasan laporan." />}
 
-      {summaryQuery.isLoading ? (
+      {rangeError ? (
+        <EmptyState
+          title="Rentang tanggal tidak valid"
+          description="Perbaiki tanggal “Dari” dan “Sampai” untuk memuat laporan."
+        />
+      ) : summaryQuery.isLoading ? (
         <Spinner />
       ) : summary ? (
         <>
