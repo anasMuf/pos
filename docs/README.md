@@ -36,6 +36,7 @@ Sesuaikan template di bawah dengan tech stack di atas saat menulis dokumentasi.
 docs/
 ├── README.md                       # ← Kamu di sini
 ├── ui-ux-audit.md                  # Audit form & UX (backlog perbaikan)
+├── input-ux-audit.md               # Audit input & interaksi ronde 2 (dropdown, kasir, shift)
 ├── issue/
 │   └── README.md                   # Template penulisan issue
 ├── <nama-fitur>/
@@ -569,6 +570,7 @@ Response `201 Created`:
 | Dokumen | Isi |
 | --- | --- |
 | [`ui-ux-audit.md`](ui-ux-audit.md) | Audit form & UX: input manual/hardcoded, prioritas P0–P2, kriteria penerimaan, checklist form baru |
+| [`input-ux-audit.md`](input-ux-audit.md) | Audit input & interaksi ronde 2: dropdown kustom, field kasir, capability pesanan, halaman pelanggan, kas shift |
 | [`core/`](core/) | Source of truth produk: PRD, UX Flow, UI Spec, ERD, API Contract |
 
 ---
