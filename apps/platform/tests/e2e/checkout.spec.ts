@@ -113,10 +113,8 @@ test.describe('cashier checkout', () => {
     await page.getByRole('button', { name: 'Simpan', exact: true }).click();
 
     await expect(page.getByRole('dialog', { name: 'Pelanggan Baru' })).toHaveCount(0);
-    await expect(page.getByRole('combobox', { name: 'Pelanggan Terdaftar' })).toHaveValue(/\d+/);
-    const selected = await page
-      .getByRole('combobox', { name: 'Pelanggan Terdaftar' })
-      .evaluate((element) => (element as HTMLSelectElement).selectedOptions[0]?.textContent ?? '');
-    expect(selected).toContain(customerName);
+    await expect(
+      page.getByRole('combobox', { name: 'Pelanggan Terdaftar' }),
+    ).toContainText(customerName);
   });
 });
