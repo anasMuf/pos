@@ -395,6 +395,9 @@ export function PosPage() {
                         {item.modifiers.length > 0 && (
                           <p className="text-xs text-gray-500">{item.modifiers.join(', ')}</p>
                         )}
+                        {typeof item.meta.note === 'string' && item.meta.note && (
+                          <p className="text-xs text-gray-500 italic">“{item.meta.note}”</p>
+                        )}
                         <p className="text-xs text-gray-500">{formatCurrency(item.unitPrice)} / unit</p>
                       </div>
                       <button
@@ -649,6 +652,7 @@ function ItemConfigurator({
   const [selectedModifiers, setSelectedModifiers] = useState<string[]>([]);
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
+  const [note, setNote] = useState('');
 
   const variant = variants.find((item) => item.id === variantId);
   const priced = priceLine({
@@ -673,6 +677,9 @@ function ItemConfigurator({
   }
   if (selectedModifiers.length > 0) {
     meta.modifiers = selectedModifiers;
+  }
+  if (note.trim()) {
+    meta.note = note.trim();
   }
 
   return (
@@ -768,6 +775,18 @@ function ItemConfigurator({
             </div>
           )}
 
+          <div>
+            <Label htmlFor="item-note">Catatan (opsional)</Label>
+            <Input
+              id="item-note"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Contoh: tanpa gula, warna hitam"
+              maxLength={200}
+              className="mt-1"
+            />
+          </div>
+
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <Label htmlFor="qty">Qty</Label>
@@ -787,35 +806,35 @@ function ItemConfigurator({
           </div>
         </div>
 
-        		<div className="mt-5 space-y-2">
-        			{dimensionInvalid && (
-        				<p className="text-xs text-red-600">Isi lebar dan tinggi untuk menghitung harga dimensi.</p>
-        			)}
-        			<div className="flex gap-2">
-        				<Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
-        					Batal
-        				</Button>
-        				<Button
-        					type="button"
-        					className="flex-1"
-        					disabled={dimensionInvalid}
-        					onClick={() =>
-        						onAdd({
-        							key: newClientId('cart'),
-        							product,
-        							variantId,
-        							variantName: variant?.name,
-        							qty,
-        							unitPrice,
-        							modifiers: selectedModifiers,
-        							meta,
-        						})
-        					}
-        				>
-        					Tambah
-        				</Button>
-        			</div>
-        		</div>
+        <div className="mt-5 space-y-2">
+          {dimensionInvalid && (
+            <p className="text-xs text-red-600">Isi lebar dan tinggi untuk menghitung harga dimensi.</p>
+          )}
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+              Batal
+            </Button>
+            <Button
+              type="button"
+              className="flex-1"
+              disabled={dimensionInvalid}
+              onClick={() =>
+                onAdd({
+                  key: newClientId('cart'),
+                  product,
+                  variantId,
+                  variantName: variant?.name,
+                  qty,
+                  unitPrice,
+                  modifiers: selectedModifiers,
+                  meta,
+                })
+              }
+            >
+              Tambah
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
