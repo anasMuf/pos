@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { NumberInput } from '../../src/components/atoms/NumberInput';
+
+function ControlledNumberInput(props: {
+  initialValue: string;
+  min?: number;
+  max?: number;
+  decimals?: number;
+  step?: number;
+  showStepper?: boolean;
+  suffix?: string;
+}) {
+  const [value, setValue] = useState(props.initialValue);
+  return (
+    <NumberInput
+      aria-label="Qty"
+      value={value}
+      onChange={setValue}
+      min={props.min}
+      max={props.max}
+      decimals={props.decimals}
+      step={props.step}
+      showStepper={props.showStepper}
+      suffix={props.suffix}
+    />
+  );
+}
+
+describe('NumberInput', () => {
+  it('hides the spinner by default for free-form values', () => {
+    render(<ControlledNumberInput initialValue="120" />);
+    expect(screen.queryByRole('button')).toBeNull();
+    expect((screen.getByLabelText('Qty') as HTMLInputElement).value).toBe('120');
+  });
+
+  it('is a right-aligned numeric text field, not a native number input', () => {
+    render(<ControlledNumberInput initialValue="5" />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+    expect(input.type).toBe('text');
+    expect(input.inputMode).toBe('numeric');
+  });
+
+  it('shows a unit suffix when provided', () => {
+    render(<ControlledNumberInput initialValue="10" suffix="%" />);
+    expect(screen.getByText('%')).toBeTruthy();
+  });
+
+  it('rejects letters and symbols while typing', () => {
+    render(<ControlledNumberInput initialValue="" />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: '12abc' } });
+    expect(input.value).toBe('12');
+
+    fireEvent.change(input, { target: { value: 'e5+' } });
+    expect(input.value).toBe('5');
+  });
+
+  it('accepts a comma decimal separator and caps decimal places', () => {
+    render(<ControlledNumberInput initialValue="" decimals={2} />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: '1,2345' } });
+    expect(input.value).toBe('1.23');
+  });
+
+  it('only allows negative values when there is no minimum', () => {
+    const { unmount } = render(<ControlledNumberInput initialValue="" min={0} />);
+    const positiveOnly = screen.getByLabelText('Qty') as HTMLInputElement;
+    fireEvent.change(positiveOnly, { target: { value: '-5' } });
+    expect(positiveOnly.value).toBe('5');
+    unmount();
+
+    render(<ControlledNumberInput initialValue="" />);
+    const signed = screen.getByLabelText('Qty') as HTMLInputElement;
+    fireEvent.change(signed, { target: { value: '-5' } });
+    expect(signed.value).toBe('-5');
+  });
+
+  it('increments and decrements with the spinner when enabled', () => {
+    render(<ControlledNumberInput initialValue="3" showStepper />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.click(screen.getByRole('button', { name: 'Naikkan nilai' }));
+    expect(input.value).toBe('4');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Turunkan nilai' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Turunkan nilai' }));
+    expect(input.value).toBe('2');
+  });
+
+  it('respects min and max bounds', () => {
+    render(<ControlledNumberInput initialValue="5" min={0} max={5} showStepper />);
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.click(screen.getByRole('button', { name: 'Naikkan nilai' }));
+    expect(input.value).toBe('5');
+    expect(
+      (screen.getByRole('button', { name: 'Naikkan nilai' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+
+    fireEvent.change(input, { target: { value: '0' } });
+    expect(
+      (screen.getByRole('button', { name: 'Turunkan nilai' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+  });
+
+  it('steps decimal values without floating point noise', () => {
+    render(
+      <ControlledNumberInput initialValue="1.4" decimals={1} showStepper step={0.1} />,
+    );
+    const input = screen.getByLabelText('Qty') as HTMLInputElement;
+
+    fireEvent.click(screen.getByRole('button', { name: 'Naikkan nilai' }));
+    expect(input.value).toBe('1.5');
+  });
+});

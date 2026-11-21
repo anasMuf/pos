@@ -7,6 +7,7 @@ import type { PaymentMethod } from '../../api/types';
 import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
+import { CurrencyInput } from '../../components/atoms/CurrencyInput';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
@@ -144,13 +145,11 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
                   Lunasi semua
                 </button>
               </div>
-              <Input
+              <CurrencyInput
                 id="payment-amount"
-                type="number"
-                min={0}
                 value={amount}
-                onChange={(event) => {
-                  setAmount(event.target.value);
+                onChange={(value) => {
+                  setAmount(value);
                   setError('');
                 }}
                 className="mt-1"

@@ -5,7 +5,7 @@ import { useApp } from '../app/AppContext';
 import { useCashShift, useCloseShift } from '../../api/queries';
 import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
-import { Input } from '../../components/atoms/Input';
+import { CurrencyInput } from '../../components/atoms/CurrencyInput';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
@@ -109,16 +109,13 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
             </dl>
             <div>
               <Label htmlFor="closing-cash">Kas fisik akhir shift</Label>
-              <Input
+              <CurrencyInput
                 id="closing-cash"
-                type="number"
-                min={0}
                 value={closingCash}
-                onChange={(event) => {
-                  setClosingCash(event.target.value);
+                onChange={(value) => {
+                  setClosingCash(value);
                   setError('');
                 }}
-                placeholder="0"
                 className="mt-1"
                 aria-invalid={!!error}
                 aria-describedby={error ? 'closing-cash-error' : undefined}

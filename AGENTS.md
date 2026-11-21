@@ -76,9 +76,13 @@ that can switch to offline and sync back idempotently.
 - Anggota outlet dipilih dari hasil `GET /api/users/search` (`useSearchUsers`), bukan input `user_id` mentah.
 - Preset capability hanya didefinisikan di `src/lib/capabilities.ts` (`CAPABILITY_PRESETS`); form create dan
   edit outlet sama-sama memakai preset + Reset.
-- Atomic components: `components/atoms/{Button,Input,Label,Select,FieldError}`; molecules:
-  `{FormField,ConfirmDialog,Toast}` plus `molecules/ui` (`PageHeader`, `Card`, `EmptyState`, `AccessDenied`,
-  `Spinner`, `Table`, `Badge`, `ErrorAlert`).
+- Atomic components: `components/atoms/{Button,Input,NumberInput,CurrencyInput,Label,Select,FieldError}`;
+  molecules: `{FormField,ConfirmDialog,Toast,UnsavedChangesGuard}` plus `molecules/ui` (`PageHeader`,
+  `Card`, `EmptyState`, `AccessDenied`, `Spinner`, `ListSkeleton`, `Table`, `Badge`, `ErrorAlert`).
+- Angka tidak memakai `<input type="number">`: nominal uang pakai `CurrencyInput` (format ribuan id-ID,
+  nilai tersimpan sebagai digit mentah), sedangkan qty/persen/dimensi pakai `NumberInput`
+  (input numerik rata kanan; `suffix="%"` untuk persen, `decimals`, `min`/`max`). Spinner chevron
+  (`showStepper`) hanya untuk nilai kecil yang memang di-nudge, seperti qty keranjang POS.
 - Use the shared fetch mutator (`src/api/mutator/custom-instance.ts`) and typed hooks.
 - List endpoints return `{message, data: [], meta: {page, limit, total, has_more}}`; list screens use
   `useInfinite*` hooks (React Query `useInfiniteQuery` + `InfiniteScrollSentinel`), not page buttons.
