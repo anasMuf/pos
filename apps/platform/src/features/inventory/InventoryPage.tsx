@@ -38,6 +38,7 @@ export function InventoryPage() {
           canManage ? (
             <Link
               to="/inventory/new"
+              search={{ product_id: undefined, variant_id: undefined }}
               className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
             >
               <Plus className="mr-1 h-4 w-4" /> Catat Mutasi
