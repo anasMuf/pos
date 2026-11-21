@@ -103,6 +103,8 @@ test.describe('catalog & outlet editing', () => {
 
       const variantRow = page.getByRole('row').filter({ hasText: variantName });
       await variantRow.getByRole('link', { name: 'Edit varian' }).click();
+      // Variant stock is read-only on edit; changes must go through a stock movement.
+      await expect(page.getByRole('link', { name: 'Catat mutasi stok' })).toBeVisible();
       const editedName = `${variantName} edited`;
       await page.getByLabel('Nama', { exact: true }).fill(editedName);
       await page.getByRole('button', { name: 'Simpan Perubahan' }).click();

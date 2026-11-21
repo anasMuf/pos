@@ -68,7 +68,7 @@ that can switch to offline and sync back idempotently.
 - **Setiap form tambah/edit punya route sendiri** (`/products/new`, `/products/$id/edit`,
   `/customers/$id/edit`, `/inventory/new`, `/shifts/new`, `/outlets/$id/edit`, `/tenants/$id/edit`, dst).
   Halaman list/detail hanya menautkan ke route tersebut; jangan menaruh form CRUD inline atau di modal.
-  Pengecualian: `ItemConfigurator` di POS (alur transaksi) dan `ReceiptModal` (preview).
+  Pengecualian: `ItemConfigurator` dan `QuickCustomerModal` di POS (alur transaksi) serta `ReceiptModal` (preview).
 - Form wajib punya validasi inline per field (`FieldError` + `aria-invalid`) dan fokus ke field pertama
   yang gagal; toast hanya ringkasan. Halaman edit wajib punya not-found/error state, bukan form kosong.
 - Anggota outlet dipilih dari hasil `GET /api/users/search` (`useSearchUsers`), bukan input `user_id` mentah.
@@ -118,6 +118,9 @@ that can switch to offline and sync back idempotently.
 - Reports (`GET /api/reports/summary`, `GET /api/reports/reconciliation`) are owner/manager scoped;
   totals use server `created_at`; offline reconciliation uses `is_offline_created` + `synced_at`.
 - Stock movements types: `stock_in`, `stock_out`, `sale`, `adjustment`, `sync_reconcile`.
+- Stock changes after creation go through `/api/stock-movements` (audit trail). Product create may set an
+  initial `stock_qty`; variant edit treats stock as read-only and links to `/inventory/new`
+  (`?product_id=&variant_id=` prefill).
 - Server is authoritative for pricing: client `unit_price` is ignored; dimension/tiered/modifier/area are recomputed in `service/pricing_service.go`.
 - Discount/tax are server-computed: `discount_percent` + `discount_amount` are capped at subtotal, then
   `tax_percent` applies to the discounted subtotal; `orders` stores `discount_amount`, `tax_amount`, and

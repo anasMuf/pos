@@ -19,7 +19,7 @@ function Login() {
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 className="text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-          Sign in to your account
+          Masuk ke akun Anda
         </h2>
       </div>
 
@@ -27,9 +27,9 @@ function Login() {
         <LoginForm onSuccess={() => navigate({ to: '/' })} />
 
         <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Don't have an account?{' '}
+          Belum punya akun?{' '}
           <Link to="/register" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Register here
+            Daftar di sini
           </Link>
         </p>
       </div>

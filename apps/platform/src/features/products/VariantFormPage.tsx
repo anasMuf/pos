@@ -9,6 +9,7 @@ import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
+import { formatNumber } from '../../lib/format';
 
 const EMPTY_FORM = { name: '', sku: '', barcode: '', price_override: '', stock_qty: '0' };
 
@@ -100,19 +101,19 @@ export function VariantFormPage({
       document.getElementById(`variant-${first === 'stock_qty' ? 'stock' : first}`)?.focus();
       return;
     }
-    const payload = {
+    const basePayload = {
       name: form.name,
       sku: form.sku,
       barcode: form.barcode || undefined,
       price_override: form.price_override ? Number(form.price_override) : undefined,
-      stock_qty: Number(form.stock_qty) || 0,
     };
     try {
       if (variantId) {
-        await updateVariant.mutateAsync({ id: variantId, ...payload });
+        // Stock on edit is read-only; adjustments go through /inventory/new.
+        await updateVariant.mutateAsync({ id: variantId, ...basePayload });
         addToast({ variant: 'success', title: 'Varian diperbarui', message: form.name });
       } else {
-        await createVariant.mutateAsync(payload);
+        await createVariant.mutateAsync({ ...basePayload, stock_qty: Number(form.stock_qty) || 0 });
         addToast({ variant: 'success', title: 'Varian ditambahkan', message: form.name });
       }
       navigate({ to: '/products/$id/variants', params: { id: String(productId) } });
@@ -192,16 +193,36 @@ export function VariantFormPage({
           </div>
           <div>
             <Label htmlFor="variant-stock">Stok</Label>
-            <Input
-              id="variant-stock"
-              type="number"
-              value={form.stock_qty}
-              onChange={(event) => setForm({ ...form, stock_qty: event.target.value })}
-              className="mt-1"
-              aria-invalid={!!errors.stock_qty}
-              aria-describedby={errors.stock_qty ? 'variant-stock-error' : undefined}
-            />
-            <FieldError id="variant-stock-error" message={errors.stock_qty} />
+            {variantId ? (
+              <>
+                <p id="variant-stock" className="mt-2 text-sm text-gray-900">
+                  {variant ? formatNumber(variant.stock_qty) : '—'}
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Perubahan stok dicatat lewat mutasi agar ada jejak audit.{' '}
+                  <Link
+                    to="/inventory/new"
+                    search={{ product_id: productId, variant_id: variantId }}
+                    className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
+                    Catat mutasi stok
+                  </Link>
+                </p>
+              </>
+            ) : (
+              <>
+                <Input
+                  id="variant-stock"
+                  type="number"
+                  value={form.stock_qty}
+                  onChange={(event) => setForm({ ...form, stock_qty: event.target.value })}
+                  className="mt-1"
+                  aria-invalid={!!errors.stock_qty}
+                  aria-describedby={errors.stock_qty ? 'variant-stock-error' : undefined}
+                />
+                <FieldError id="variant-stock-error" message={errors.stock_qty} />
+              </>
+            )}
           </div>
         </div>
 

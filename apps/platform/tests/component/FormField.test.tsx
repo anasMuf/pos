@@ -13,9 +13,18 @@ describe('FormField', () => {
     const input = screen.getByLabelText('Password') as HTMLInputElement;
 
     expect(input.type).toBe('password');
-    fireEvent.click(screen.getByRole('button', { name: 'Show' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tampilkan' }));
     expect(input.type).toBe('text');
-    fireEvent.click(screen.getByRole('button', { name: 'Hide' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sembunyikan' }));
     expect(input.type).toBe('password');
+  });
+
+  it('exposes inline errors to assistive technology', () => {
+    render(<FormField id="email" name="email" label="Email" error="Email wajib diisi." />);
+    const input = screen.getByLabelText('Email');
+
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-describedby')).toBe('email-error');
+    expect(screen.getByRole('alert').textContent).toBe('Email wajib diisi.');
   });
 });

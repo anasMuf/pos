@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
-import { useCreateProduct, useProduct, useUpdateProduct } from '../../api/queries';
+import { useCreateProduct, useProduct, useProducts, useUpdateProduct } from '../../api/queries';
 import type { CommissionType, PricingType } from '../../api/types';
 import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
@@ -108,10 +108,24 @@ export function ProductFormPage({ productId }: { productId?: number }) {
   const { addToast } = useToast();
   const { activeOutletId, activeOutlet, canManage } = useApp();
   const { data: product, isLoading, isError } = useProduct(productId ?? null);
+  const { data: outletProducts = [] } = useProducts(activeOutletId ?? undefined);
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
+
+  const categoryOptions = useMemo(() => {
+    const options = new Map<string, string>();
+    for (const item of outletProducts) {
+      const value = item.category.trim();
+      if (!value) continue;
+      const key = value.toLowerCase();
+      if (!options.has(key)) options.set(key, value);
+    }
+    const current = form.category.trim();
+    if (current && !options.has(current.toLowerCase())) options.set(current.toLowerCase(), current);
+    return [...options.values()].sort((a, b) => a.localeCompare(b));
+  }, [outletProducts, form.category]);
 
   useEffect(() => {
     if (product) setForm(parseProductForm(product));
@@ -205,10 +219,15 @@ export function ProductFormPage({ productId }: { productId?: number }) {
       .filter((modifier) => modifier.name.trim())
       .map((modifier) => ({ name: modifier.name.trim(), price: Number(modifier.price) || 0 }));
 
+    const normalizedCategory = form.category.trim().replace(/\s+/g, ' ');
+    const existingCategory = outletProducts.find(
+      (item) => item.category.trim().toLowerCase() === normalizedCategory.toLowerCase(),
+    );
+
     const payload = {
       name: form.name.trim(),
       sku: form.sku.trim(),
-      category: form.category.trim(),
+      category: existingCategory ? existingCategory.category.trim() : normalizedCategory,
       pricing_type: form.pricing_type,
       base_price: Number(form.base_price) || 0,
       track_inventory: form.track_inventory,
@@ -299,10 +318,20 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               id="product-category"
               value={form.category}
               onChange={(event) => setField('category', event.target.value)}
+              list="product-category-options"
+              autoComplete="off"
               className="mt-1"
               aria-invalid={!!errors.category}
-              aria-describedby={errors.category ? 'product-category-error' : undefined}
+              aria-describedby={errors.category ? 'product-category-error' : 'product-category-hint'}
             />
+            <datalist id="product-category-options">
+              {categoryOptions.map((category) => (
+                <option key={category} value={category} />
+              ))}
+            </datalist>
+            <p id="product-category-hint" className="mt-1 text-xs text-gray-500">
+              Pilih kategori yang sudah ada atau ketik yang baru.
+            </p>
             {errors.category && (
               <p id="product-category-error" role="alert" className="mt-1 text-xs text-red-600">
                 {errors.category}

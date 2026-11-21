@@ -18,15 +18,21 @@ const MANUAL_TYPES: { value: MovementType; label: string }[] = [
   { value: 'adjustment', label: 'Penyesuaian / Opname' },
 ];
 
-export function InventoryMutationPage() {
+export function InventoryMutationPage({
+  initialProductId,
+  initialVariantId,
+}: {
+  initialProductId?: number;
+  initialVariantId?: number;
+} = {}) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { activeOutletId, activeOutlet, canManage } = useApp();
   const { data: products = [] } = useProducts(activeOutletId ?? undefined);
   const createMovement = useCreateStockMovement();
 
-  const [productId, setProductId] = useState('');
-  const [variantId, setVariantId] = useState('');
+  const [productId, setProductId] = useState(initialProductId ? String(initialProductId) : '');
+  const [variantId, setVariantId] = useState(initialVariantId ? String(initialVariantId) : '');
   const [movementType, setMovementType] = useState<MovementType>('stock_in');
   const [qty, setQty] = useState('');
   const [note, setNote] = useState('');

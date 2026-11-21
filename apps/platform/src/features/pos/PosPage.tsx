@@ -16,9 +16,11 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
+import { FieldError } from '../../components/atoms/FieldError';
 import { useToast } from '../../components/molecules/Toast';
 import { formatCurrency, newClientId } from '../../lib/format';
 import { priceLine } from '../../lib/pricing';
+import { QuickCustomerModal } from './QuickCustomerModal';
 
 interface CartItem {
   key: string;
@@ -44,9 +46,12 @@ export function PosPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [customerName, setCustomerName] = useState('');
   const [customerId, setCustomerId] = useState('');
+  const [quickCustomerOpen, setQuickCustomerOpen] = useState(false);
   const [paymentType, setPaymentType] = useState<PaymentType>('full');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [cashReceived, setCashReceived] = useState('');
+  const [paymentError, setPaymentError] = useState('');
   const [orderStatus, setOrderStatus] = useState<OrderStatus>('completed');
   const [discountPercent, setDiscountPercent] = useState('0');
   const [discountAmount, setDiscountAmount] = useState('0');
@@ -77,6 +82,11 @@ export function PosPage() {
     return taxable + (taxable * (Number(taxPercent) || 0)) / 100;
   })();
 
+  const amountDue =
+    paymentType === 'full' ? total : Math.min(Number(paymentAmount) || 0, total);
+  const parsedCash = cashReceived.trim() === '' ? Number.NaN : Number(cashReceived);
+  const changeDue = Number.isFinite(parsedCash) ? parsedCash - amountDue : null;
+
   const addToCart = (item: CartItem) => {
     setCart((prev) => [...prev, item]);
     setSelectedProduct(null);
@@ -96,6 +106,8 @@ export function PosPage() {
     setCustomerId('');
     setPaymentType('full');
     setPaymentAmount('');
+    setCashReceived('');
+    setPaymentError('');
     setOrderStatus('completed');
     setDiscountPercent('0');
     setDiscountAmount('0');
@@ -123,6 +135,21 @@ export function PosPage() {
     if (paymentType === 'down_payment' && paidAmount <= 0) {
       addToast({ variant: 'error', title: 'Nominal DP tidak valid', message: 'Masukkan nominal DP yang benar.' });
       return;
+    }
+
+    if (paymentMethod === 'cash') {
+      const received = Number(cashReceived);
+      if (cashReceived.trim() === '' || !Number.isFinite(received) || received < paidAmount) {
+        setPaymentError(`Uang diterima minimal ${formatCurrency(paidAmount)}.`);
+        addToast({
+          variant: 'error',
+          title: 'Uang diterima kurang',
+          message: 'Nominal uang diterima harus sama atau lebih besar dari total pembayaran.',
+        });
+        document.getElementById('cash-received')?.focus();
+        return;
+      }
+      setPaymentError('');
     }
 
     const items: OrderItemPayload[] = cart.map((item) => ({
@@ -370,6 +397,9 @@ export function PosPage() {
                         {item.modifiers.length > 0 && (
                           <p className="text-xs text-gray-500">{item.modifiers.join(', ')}</p>
                         )}
+                        {typeof item.meta.note === 'string' && item.meta.note && (
+                          <p className="text-xs text-gray-500 italic">“{item.meta.note}”</p>
+                        )}
                         <p className="text-xs text-gray-500">{formatCurrency(item.unitPrice)} / unit</p>
                       </div>
                       <button
@@ -404,7 +434,16 @@ export function PosPage() {
           <Card title="Pembayaran">
             <div className="space-y-3">
               <div>
-                <Label htmlFor="customer-select">Pelanggan Terdaftar</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="customer-select">Pelanggan Terdaftar</Label>
+                  <button
+                    type="button"
+                    onClick={() => setQuickCustomerOpen(true)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Pelanggan baru
+                  </button>
+                </div>
                 <Select
                   id="customer-select"
                   value={customerId}
@@ -518,6 +557,34 @@ export function PosPage() {
                 </div>
               )}
 
+              {paymentMethod === 'cash' && (
+                <div>
+                  <Label htmlFor="cash-received">Uang diterima</Label>
+                  <Input
+                    id="cash-received"
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    value={cashReceived}
+                    onChange={(event) => {
+                      setCashReceived(event.target.value);
+                      setPaymentError('');
+                    }}
+                    placeholder="0"
+                    className="mt-1"
+                    aria-invalid={!!paymentError}
+                    aria-describedby={paymentError ? 'cash-received-error' : undefined}
+                  />
+                  <FieldError id="cash-received-error" message={paymentError} />
+                  <div className="mt-2 flex items-center justify-between text-sm" aria-live="polite">
+                    <span className="text-gray-500">Kembalian</span>
+                    <span className="font-semibold text-gray-900">
+                      {changeDue === null ? '—' : formatCurrency(changeDue)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {capabilities?.enable_order_workflow && (
                 <div>
                   <Label htmlFor="order-status">Status Pengerjaan</Label>
@@ -558,6 +625,18 @@ export function PosPage() {
         </div>
       </div>
 
+      {quickCustomerOpen && activeOutletId && (
+        <QuickCustomerModal
+          outletId={activeOutletId}
+          onClose={() => setQuickCustomerOpen(false)}
+          onCreated={(customer) => {
+            setCustomerId(String(customer.id));
+            setCustomerName(customer.name);
+            setQuickCustomerOpen(false);
+          }}
+        />
+      )}
+
       {selectedProduct && (
         <ItemConfigurator
           product={selectedProduct}
@@ -596,6 +675,7 @@ function ItemConfigurator({
   const [selectedModifiers, setSelectedModifiers] = useState<string[]>([]);
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
+  const [note, setNote] = useState('');
 
   const variant = variants.find((item) => item.id === variantId);
   const priced = priceLine({
@@ -620,6 +700,9 @@ function ItemConfigurator({
   }
   if (selectedModifiers.length > 0) {
     meta.modifiers = selectedModifiers;
+  }
+  if (note.trim()) {
+    meta.note = note.trim();
   }
 
   return (
@@ -715,6 +798,18 @@ function ItemConfigurator({
             </div>
           )}
 
+          <div>
+            <Label htmlFor="item-note">Catatan (opsional)</Label>
+            <Input
+              id="item-note"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Contoh: tanpa gula, warna hitam"
+              maxLength={200}
+              className="mt-1"
+            />
+          </div>
+
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <Label htmlFor="qty">Qty</Label>
@@ -734,35 +829,35 @@ function ItemConfigurator({
           </div>
         </div>
 
-        		<div className="mt-5 space-y-2">
-        			{dimensionInvalid && (
-        				<p className="text-xs text-red-600">Isi lebar dan tinggi untuk menghitung harga dimensi.</p>
-        			)}
-        			<div className="flex gap-2">
-        				<Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
-        					Batal
-        				</Button>
-        				<Button
-        					type="button"
-        					className="flex-1"
-        					disabled={dimensionInvalid}
-        					onClick={() =>
-        						onAdd({
-        							key: newClientId('cart'),
-        							product,
-        							variantId,
-        							variantName: variant?.name,
-        							qty,
-        							unitPrice,
-        							modifiers: selectedModifiers,
-        							meta,
-        						})
-        					}
-        				>
-        					Tambah
-        				</Button>
-        			</div>
-        		</div>
+        <div className="mt-5 space-y-2">
+          {dimensionInvalid && (
+            <p className="text-xs text-red-600">Isi lebar dan tinggi untuk menghitung harga dimensi.</p>
+          )}
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+              Batal
+            </Button>
+            <Button
+              type="button"
+              className="flex-1"
+              disabled={dimensionInvalid}
+              onClick={() =>
+                onAdd({
+                  key: newClientId('cart'),
+                  product,
+                  variantId,
+                  variantName: variant?.name,
+                  qty,
+                  unitPrice,
+                  modifiers: selectedModifiers,
+                  meta,
+                })
+              }
+            >
+              Tambah
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
