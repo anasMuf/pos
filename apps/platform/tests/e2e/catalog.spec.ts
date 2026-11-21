@@ -19,11 +19,16 @@ test.describe('catalog & outlet editing', () => {
     const preset = page.getByLabel('Preset Capability');
     const checks = page.getByRole('checkbox');
 
-    await preset.selectOption('print');
+    const choosePreset = async (label: string) => {
+      await preset.click();
+      await page.getByRole('option', { name: label }).click();
+    };
+
+    await choosePreset('Percetakan / Sablon');
     await expect(checks.first()).toBeChecked();
 
     // Switching to a smaller preset must not keep the previous true flags.
-    await preset.selectOption('retail');
+    await choosePreset('Retail / Distro');
     const checkCount = await checks.count();
     for (let index = 0; index < checkCount; index += 1) {
       if (index === 0 || index === 3) {
@@ -33,13 +38,13 @@ test.describe('catalog & outlet editing', () => {
       }
     }
 
-    // Clearing the select and the Reset button both clear every flag.
-    await preset.selectOption('');
+    // Clearing the selection and the Reset button both clear every flag.
+    await choosePreset('Pilih preset (opsional)');
     for (let index = 0; index < checkCount; index += 1) {
       await expect(checks.nth(index)).not.toBeChecked();
     }
 
-    await preset.selectOption('print');
+    await choosePreset('Percetakan / Sablon');
     await expect(checks.first()).toBeChecked();
     await page.getByRole('button', { name: 'Reset', exact: true }).click();
     for (let index = 0; index < checkCount; index += 1) {
