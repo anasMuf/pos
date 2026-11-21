@@ -31,6 +31,8 @@ export function OrdersPage() {
   const [paymentFilter, setPaymentFilter] = useState<PaymentStatus | ''>('');
   const [search, setSearch] = useState('');
 
+  const workflowEnabled = !!activeOutlet?.capabilities.enable_order_workflow;
+
   const filters = useMemo(
     () => ({
       outlet_id: activeOutletId ?? undefined,
@@ -98,21 +100,31 @@ export function OrdersPage() {
         }
       />
 
-      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className={`mb-4 grid grid-cols-1 gap-2 ${workflowEnabled ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Cari nomor pesanan / pelanggan"
         />
-        <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as OrderStatus | '')}>
-          <option value="">Semua status pengerjaan</option>
-          {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </Select>
-        <Select value={paymentFilter} onChange={(event) => setPaymentFilter(event.target.value as PaymentStatus | '')}>
+        {workflowEnabled && (
+          <Select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value as OrderStatus | '')}
+            aria-label="Filter status pengerjaan"
+          >
+            <option value="">Semua status pengerjaan</option>
+            {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </Select>
+        )}
+        <Select
+          value={paymentFilter}
+          onChange={(event) => setPaymentFilter(event.target.value as PaymentStatus | '')}
+          aria-label="Filter status pembayaran"
+        >
           <option value="">Semua status pembayaran</option>
           {Object.entries(PAYMENT_STATUS_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
@@ -161,25 +173,28 @@ export function OrdersPage() {
                 </div>
 
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
-                  <div className="w-40">
-                    <Select
-                      value={order.order_status}
-                      onChange={(event) => handleStatusChange(order, event.target.value as OrderStatus)}
-                      disabled={!canFulfill}
-                      aria-label="Ubah status pengerjaan"
-                    >
-                      {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
+                  {workflowEnabled && (
+                    <div className="w-40">
+                      <Select
+                        value={order.order_status}
+                        onChange={(event) => handleStatusChange(order, event.target.value as OrderStatus)}
+                        disabled={!canFulfill}
+                        size="sm"
+                        aria-label="Ubah status pengerjaan"
+                      >
+                        {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                  )}
                   {canOperate && order.payment_status !== 'paid' && order.order_status !== 'cancelled' && (
                     <Link
                       to="/orders/$id/payment"
                       params={{ id: String(order.id) }}
-                      className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
+                      className="inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
                     >
                       Pelunasan
                     </Link>

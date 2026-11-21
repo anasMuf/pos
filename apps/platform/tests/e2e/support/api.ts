@@ -10,6 +10,10 @@ export interface Outlet {
   id: number;
   name: string;
   address: string;
+  capabilities?: {
+    enable_order_workflow?: boolean;
+    enable_partial_payment?: boolean;
+  };
 }
 
 export interface Product {
