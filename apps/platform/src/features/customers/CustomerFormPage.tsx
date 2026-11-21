@@ -9,6 +9,7 @@ import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
+import { UnsavedChangesGuard } from '../../components/molecules/UnsavedChangesGuard';
 
 const EMPTY_FORM = { name: '', phone: '', email: '', address: '', note: '' };
 
@@ -20,18 +21,23 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
   const [form, setForm] = useState(EMPTY_FORM);
+  const [baseline, setBaseline] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState<{ name?: string }>({});
 
   useEffect(() => {
     if (!customer) return;
-    setForm({
+    const next = {
       name: customer.name,
       phone: customer.phone,
       email: customer.email,
       address: customer.address,
       note: customer.note,
-    });
+    };
+    setForm(next);
+    setBaseline(next);
   }, [customer]);
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(baseline);
 
   if (!canOperate) {
     return (
@@ -79,6 +85,7 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
         await createCustomer.mutateAsync({ outlet_id: activeOutletId as number, ...form });
         addToast({ variant: 'success', title: 'Pelanggan ditambahkan', message: form.name });
       }
+      setBaseline(form);
       navigate({ to: '/customers' });
     } catch (error) {
       addToast({
@@ -175,6 +182,8 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
           </Link>
         </div>
       </Card>
+
+      <UnsavedChangesGuard isDirty={isDirty} />
     </div>
   );
 }
