@@ -226,6 +226,7 @@ export function VariantFormPage({
                   onChange={(value) => setForm({ ...form, stock_qty: value })}
                   min={0}
                   decimals={2}
+                  showStepper
                   className="mt-1"
                   aria-invalid={!!errors.stock_qty}
                   aria-describedby={errors.stock_qty ? 'variant-stock-error' : undefined}

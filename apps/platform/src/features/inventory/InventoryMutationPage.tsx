@@ -186,6 +186,7 @@ export function InventoryMutationPage({
               }}
               min={movementType === 'adjustment' ? undefined : 0}
               decimals={2}
+              showStepper
               className="mt-1"
               aria-invalid={!!errors.qty}
               aria-describedby={errors.qty ? 'movement-qty-error' : undefined}

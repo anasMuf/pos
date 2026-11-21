@@ -379,6 +379,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               onChange={(value) => setField('stock_qty', value)}
               min={0}
               decimals={2}
+              showStepper
               disabled={!!productId}
               className="mt-1"
             />
@@ -392,6 +393,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               onChange={(value) => setField('min_stock_qty', value)}
               min={0}
               decimals={2}
+              showStepper
               className="mt-1"
             />
           </div>
@@ -428,6 +430,8 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                   onChange={(value) => setField('min_area', value)}
                   min={0}
                   decimals={2}
+                  step={0.5}
+                  showStepper
                   className="mt-1"
                 />
               </div>
@@ -473,6 +477,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                           )
                         }
                         min={1}
+                        showStepper
                         className="mt-1"
                       />
                     </div>
@@ -490,6 +495,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                           )
                         }
                         min={1}
+                        showStepper
                         className="mt-1"
                       />
                     </div>
@@ -641,7 +647,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                     onChange={(value) => setField('commission_value', value)}
                     min={0}
                     decimals={2}
-                    suffix="%"
+                    showStepper
                     className="mt-1"
                   />
                 )}

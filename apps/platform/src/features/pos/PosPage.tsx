@@ -484,7 +484,7 @@ export function PosPage() {
                     min={0}
                     max={100}
                     decimals={2}
-                    suffix="%"
+                    showStepper
                     className="mt-1"
                   />
                 </div>
@@ -506,7 +506,7 @@ export function PosPage() {
                     min={0}
                     max={100}
                     decimals={2}
-                    suffix="%"
+                    showStepper
                     className="mt-1"
                   />
                 </div>
@@ -748,6 +748,8 @@ function ItemConfigurator({
                   onChange={setWidth}
                   min={0}
                   decimals={2}
+                  step={0.1}
+                  showStepper
                   className="mt-1"
                 />
               </div>
@@ -759,6 +761,8 @@ function ItemConfigurator({
                   onChange={setHeight}
                   min={0}
                   decimals={2}
+                  step={0.1}
+                  showStepper
                   className="mt-1"
                 />
               </div>
