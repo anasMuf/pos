@@ -484,6 +484,7 @@ export function PosPage() {
                     min={0}
                     max={100}
                     decimals={2}
+                    suffix="%"
                     className="mt-1"
                   />
                 </div>
@@ -505,6 +506,7 @@ export function PosPage() {
                     min={0}
                     max={100}
                     decimals={2}
+                    suffix="%"
                     className="mt-1"
                   />
                 </div>
@@ -814,6 +816,7 @@ function ItemConfigurator({
                 value={String(qty)}
                 onChange={(value) => setQty(value === '' ? 1 : Math.max(1, Number(value) || 1))}
                 min={1}
+                showStepper
                 className="mt-1"
               />
             </div>

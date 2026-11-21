@@ -1,6 +1,5 @@
 import { type ChangeEvent, forwardRef, useId } from 'react';
-import { Minus, Plus } from 'lucide-react';
-import { Input } from './Input';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface NumberInputProps {
   id?: string;
@@ -9,10 +8,16 @@ interface NumberInputProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
-  /** Number of decimal places the stepper should step/round by (0 = integers). */
+  /** Number of decimal places used when stepping/rounding (0 = integers). */
   decimals?: number;
+  /** Amount added/removed per stepper click. */
+  step?: number;
   min?: number;
   max?: number;
+  /** Render the spinner buttons. Off by default for free-form quantities. */
+  showStepper?: boolean;
+  /** Optional unit shown inside the field when there is no stepper (e.g. "%"). */
+  suffix?: string;
   'aria-invalid'?: boolean;
   'aria-describedby'?: string;
   'aria-label'?: string;
@@ -24,10 +29,12 @@ function round(value: number, decimals: number): number {
 }
 
 /**
- * Text-based numeric input with explicit increment/decrement controls.
+ * Numeric text input with an optional spinner (chevron) control.
  *
- * Keeps the form value as a string (like the rest of the forms) so typed values
- * such as "1." or an empty field are never mangled while the user is typing.
+ * Values stay as strings so partially typed input like "1." is never lost.
+ * Use `showStepper` only where nudging by a fixed step is genuinely useful
+ * (e.g. cart quantity); free-form amounts like stock or percentages read better
+ * as a plain right-aligned numeric field.
  */
 export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(function NumberInput(
   {
@@ -38,8 +45,11 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
     className = '',
     disabled,
     decimals = 0,
+    step = 1,
     min,
     max,
+    showStepper = false,
+    suffix,
     'aria-invalid': ariaInvalid,
     'aria-describedby': ariaDescribedBy,
     'aria-label': ariaLabel,
@@ -48,29 +58,28 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const step = decimals > 0 ? round(1 / 10 ** decimals, decimals) : 1;
 
   const current = value.trim() === '' ? null : Number(value);
-  const canDecrement = !disabled && (current === null || min === undefined || current - step >= min);
-  const canIncrement = !disabled && (current === null || max === undefined || current + step <= max);
+  const canStep = !disabled && current !== null && !Number.isNaN(current);
+  const canDecrement = canStep && (min === undefined || (current as number) - step >= min);
+  const canIncrement = canStep && (max === undefined || (current as number) + step <= max);
 
-  const apply = (next: number) => {
+  const applyStep = (direction: 1 | -1) => {
+    const base = current !== null && !Number.isNaN(current) ? current : (min ?? 0);
+    const next = base + direction * step;
     const clamped = Math.min(max ?? Number.POSITIVE_INFINITY, Math.max(min ?? Number.NEGATIVE_INFINITY, next));
     onChange(String(round(clamped, decimals)));
-  };
-
-  const handleStep = (direction: 1 | -1) => {
-    const base = current === null || Number.isNaN(current) ? (min ?? 0) : current;
-    apply(base + direction * step);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
   };
 
+  const padding = showStepper ? 'pr-9' : suffix ? 'pr-8' : 'pr-3';
+
   return (
-    <div className={`flex items-stretch gap-1 ${className}`}>
-      <Input
+    <div className={`relative ${className}`}>
+      <input
         ref={ref}
         id={inputId}
         type="text"
@@ -82,28 +91,46 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
         aria-invalid={ariaInvalid}
         aria-describedby={ariaDescribedBy}
         aria-label={ariaLabel}
-        className="text-right tabular-nums"
+        className={`
+          block w-full rounded-md bg-white py-2 pl-3 text-base text-gray-900 tabular-nums
+          outline-1 -outline-offset-1 outline-gray-300
+          placeholder:text-gray-400
+          focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600
+          disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500
+          sm:text-sm/6
+          ${padding} text-right
+        `}
       />
-      <div className="flex shrink-0 overflow-hidden rounded-md ring-1 ring-inset ring-gray-300">
-        <button
-          type="button"
-          onClick={() => handleStep(-1)}
-          disabled={!canDecrement}
-          aria-label="Turunkan"
-          className="flex w-8 items-center justify-center bg-white text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+      {!showStepper && suffix && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-gray-500"
         >
-          <Minus className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => handleStep(1)}
-          disabled={!canIncrement}
-          aria-label="Naikkan"
-          className="flex w-8 items-center justify-center border-l border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
-      </div>
+          {suffix}
+        </span>
+      )}
+      {showStepper && (
+        <div className="absolute inset-y-1 right-1 flex w-6 flex-col overflow-hidden rounded border border-gray-200">
+          <button
+            type="button"
+            onClick={() => applyStep(1)}
+            disabled={!canIncrement}
+            aria-label="Naikkan nilai"
+            className="flex flex-1 items-center justify-center bg-white text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronUp className="h-3 w-3" />
+          </button>
+          <button
+            type="button"
+            onClick={() => applyStep(-1)}
+            disabled={!canDecrement}
+            aria-label="Turunkan nilai"
+            className="flex flex-1 items-center justify-center border-t border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronDown className="h-3 w-3" />
+          </button>
+        </div>
+      )}
     </div>
   );
 });

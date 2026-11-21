@@ -641,6 +641,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                     onChange={(value) => setField('commission_value', value)}
                     min={0}
                     decimals={2}
+                    suffix="%"
                     className="mt-1"
                   />
                 )}
