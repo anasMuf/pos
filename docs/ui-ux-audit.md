@@ -142,6 +142,7 @@ Gunakan checklist ini saat menambah form tambah/edit:
 - [ ] Route sendiri (`/<entity>/new`, `/<entity>/$id/edit`); list/detail hanya menautkan.
 - [ ] Guard role (`canManage`/`canOperate`) + `AccessDenied`.
 - [ ] Validasi inline per field + `aria-invalid` + fokus ke error pertama.
+- [ ] Input angka memakai `CurrencyInput` (uang) atau `NumberInput` (qty/persen), bukan `type="number"`.
 - [ ] Label eksplisit (`htmlFor`) untuk setiap input; tidak ada input tanpa nama aksesibel.
 - [ ] Loading state saat fetch, error/not-found state, dan empty state.
 - [ ] Tombol simpan menampilkan status pending dan mencegah double submit.
