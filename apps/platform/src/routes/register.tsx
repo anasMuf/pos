@@ -19,10 +19,10 @@ function Register() {
     <div className="flex min-h-screen flex-col justify-center bg-gray-50 px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-          Create your account
+          Buat akun Anda
         </h2>
         <p className="mt-2 text-center text-sm text-gray-500">
-          Fill in the details below to get started.
+          Isi data berikut untuk memulai.
         </p>
       </div>
 
@@ -30,9 +30,9 @@ function Register() {
         <RegisterForm onSuccess={() => navigate({ to: '/login' })} />
 
         <p className="mt-10 text-center text-sm/6 text-gray-500">
-          Already have an account?{' '}
+          Sudah punya akun?{' '}
           <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Sign in
+            Masuk
           </Link>
         </p>
       </div>

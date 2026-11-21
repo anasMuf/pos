@@ -14,42 +14,57 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     email: '',
     password: '',
   });
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const loginMutation = usePostUsersLogin({
     mutation: {
       onSuccess: (response: postUsersLoginResponse) => {
         if (response.status === 200 && response.data.token) {
           login(response.data.token);
-          addToast({ variant: 'success', title: 'Welcome back!', message: 'You have signed in successfully.' });
+          addToast({ variant: 'success', title: 'Berhasil masuk', message: 'Selamat datang kembali.' });
           onSuccess();
         }
       },
       onError: (error: Error) => {
         const message = error instanceof ApiError
           ? error.message
-          : 'An unexpected error occurred. Please try again.';
-        addToast({ variant: 'error', title: 'Sign in failed', message });
+          : 'Terjadi kesalahan. Silakan coba lagi.';
+        addToast({ variant: 'error', title: 'Gagal masuk', message });
       }
     }
   });
 
+  const validate = () => {
+    const next: { email?: string; password?: string } = {};
+    if (!formData.email.trim()) next.email = 'Email wajib diisi.';
+    if (!formData.password) next.password = 'Kata sandi wajib diisi.';
+    setErrors(next);
+    const firstInvalid = Object.keys(next)[0];
+    if (firstInvalid) document.getElementById(firstInvalid)?.focus();
+    return Object.keys(next).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate({ data: { email: formData.email, password: formData.password } });
+    if (!validate()) return;
+    loginMutation.mutate({ data: { email: formData.email.trim(), password: formData.password } });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name in errors) setErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <FormField
         id="email"
         name="email"
         type="email"
-        label="Email address"
+        label="Email"
+        autoComplete="email"
         onChange={handleChange}
+        error={errors.email}
         required
       />
 
@@ -57,8 +72,10 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         id="password"
         name="password"
         type="password"
-        label="Password"
+        label="Kata sandi"
+        autoComplete="current-password"
         onChange={handleChange}
+        error={errors.password}
         required
       />
 
@@ -67,7 +84,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         className="w-full"
         disabled={loginMutation.isPending}
       >
-        {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
+        {loginMutation.isPending ? 'Memproses...' : 'Masuk'}
       </Button>
     </form>
   );
