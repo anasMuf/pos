@@ -9,8 +9,8 @@ import {
   Card,
   EmptyState,
   InfiniteScrollSentinel,
+  ListSkeleton,
   PageHeader,
-  Spinner,
   Table,
 } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
@@ -105,7 +105,7 @@ export function CustomersPage() {
       </div>
 
       {isLoading ? (
-        <Spinner />
+        <ListSkeleton />
       ) : customers.length === 0 ? (
         <EmptyState
           title="Belum ada pelanggan"

@@ -9,8 +9,8 @@ import {
   Card,
   EmptyState,
   InfiniteScrollSentinel,
+  ListSkeleton,
   PageHeader,
-  Spinner,
 } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Select } from '../../components/atoms/Select';
@@ -123,7 +123,7 @@ export function OrdersPage() {
       </div>
 
       {isLoading ? (
-        <Spinner />
+        <ListSkeleton rows={3} variant="cards" />
       ) : orders.length === 0 ? (
         <EmptyState
           title="Belum ada pesanan"
