@@ -130,7 +130,19 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <Label htmlFor="payment-amount">Nominal</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="payment-amount">Nominal</Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAmount(String(remaining));
+                    setError('');
+                  }}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-500"
+                >
+                  Lunasi semua
+                </button>
+              </div>
               <Input
                 id="payment-amount"
                 type="number"
