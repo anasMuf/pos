@@ -17,7 +17,8 @@ Kedua jalur bisa dikerjakan **paralel** karena sumber kebenarannya sama: **PRD**
 
 ## Konteks Proyek
 
-Dokumentasi ini digunakan dalam konteks **GOTS Monorepo Starter Kit** dengan tech stack:
+Dokumentasi ini digunakan dalam konteks **Universal Multi-Capability POS** (multi-tenant, multi-outlet,
+capability-driven) dengan tech stack:
 
 | Layer    | Stack                                                                 |
 |----------|-----------------------------------------------------------------------|
@@ -34,6 +35,7 @@ Sesuaikan template di bawah dengan tech stack di atas saat menulis dokumentasi.
 ```
 docs/
 ├── README.md                       # ← Kamu di sini
+├── ui-ux-audit.md                  # Audit form & UX (backlog perbaikan)
 ├── issue/
 │   └── README.md                   # Template penulisan issue
 ├── <nama-fitur>/
@@ -559,6 +561,15 @@ Response `201 Created`:
 }
 ```
 ````
+
+---
+
+## Dokumen Pendukung
+
+| Dokumen | Isi |
+| --- | --- |
+| [`ui-ux-audit.md`](ui-ux-audit.md) | Audit form & UX: input manual/hardcoded, prioritas P0–P2, kriteria penerimaan, checklist form baru |
+| [`core/`](core/) | Source of truth produk: PRD, UX Flow, UI Spec, ERD, API Contract |
 
 ---
 
