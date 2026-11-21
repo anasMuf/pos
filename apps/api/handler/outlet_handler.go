@@ -23,11 +23,11 @@ func NewOutletHandler(s *service.OutletService, access *service.AccessService, m
 func (h *OutletHandler) List(c echo.Context) error {
 	page, limit := pagination(c)
 	tenantID, _ := strconv.ParseUint(c.QueryParam("tenant_id"), 10, 64)
-	outlets, _, err := h.service.List(page, limit, c.QueryParam("search"), uint(tenantID), h.access.OutletIDs(currentUserID(c)))
+	outlets, total, err := h.service.List(page, limit, c.QueryParam("search"), uint(tenantID), h.access.OutletIDs(currentUserID(c)))
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Outlets retrieved successfully", outlets)
+	return respondPage(c, http.StatusOK, "Outlets retrieved successfully", outlets, page, limit, total)
 }
 
 func (h *OutletHandler) Get(c echo.Context) error {

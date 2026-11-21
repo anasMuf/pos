@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from './client';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiDelete, apiGet, apiGetPage, apiPatch, apiPost, apiPut } from './client';
 import {
   cacheOutlets,
   cacheProducts,
@@ -104,7 +104,7 @@ export function useOutlets(enabled = true) {
     queryKey: queryKeys.outlets,
     queryFn: async () => {
       try {
-        const outlets = await apiGet<Outlet[]>('/outlets');
+        const outlets = await apiGet<Outlet[]>('/outlets', { limit: 100 });
         await cacheOutlets(outlets);
         return outlets;
       } catch (error) {
@@ -250,7 +250,7 @@ export function useProducts(outletId?: number) {
       try {
         const products = await apiGet<Product[]>(
           '/products',
-          outletId ? { outlet_id: outletId } : undefined,
+          outletId ? { outlet_id: outletId, limit: 100 } : { limit: 100 },
         );
         if (outletId) {
           await cacheProducts(outletId, products);
@@ -546,13 +546,87 @@ export function useSyncOrders() {
 
 // ---- Customers ----
 export function useCustomers(outletId?: number, search?: string) {
-  const params: Record<string, unknown> = {};
+  const params: Record<string, unknown> = { limit: 100 };
   if (outletId) params.outlet_id = outletId;
   if (search) params.search = search;
 
   return useQuery({
     queryKey: [...queryKeys.customers(outletId), search ?? ''],
     queryFn: () => apiGet<Customer[]>('/customers', params),
+  });
+}
+
+// ---- Infinite lists (list screens) ----
+
+/** Page size used by the infinite-scroll list screens. */
+export const LIST_PAGE_SIZE = 20;
+
+function nextPage(lastPage: { meta: { has_more: boolean; page: number } }): number | undefined {
+  return lastPage.meta.has_more ? lastPage.meta.page + 1 : undefined;
+}
+
+export function useInfiniteProducts(outletId?: number, search?: string) {
+  return useInfiniteQuery({
+    queryKey: ['products', outletId ?? 'all', 'infinite', search ?? ''] as const,
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      const params: Record<string, unknown> = { page: pageParam, limit: LIST_PAGE_SIZE };
+      if (outletId) params.outlet_id = outletId;
+      if (search) params.search = search;
+      try {
+        return await apiGetPage<Product>('/products', params);
+      } catch (error) {
+        // Offline fallback: only the first page can be replayed from IndexedDB.
+        if (pageParam === 1 && outletId && !search) {
+          const cached = await getCachedProducts(outletId);
+          if (cached) {
+            return {
+              items: cached.slice(0, LIST_PAGE_SIZE),
+              meta: {
+                page: 1,
+                limit: LIST_PAGE_SIZE,
+                total: cached.length,
+                has_more: cached.length > LIST_PAGE_SIZE,
+              },
+            };
+          }
+        }
+        throw error;
+      }
+    },
+    getNextPageParam: nextPage,
+    retry: 1,
+  });
+}
+
+export function useInfiniteCustomers(outletId?: number, search?: string) {
+  return useInfiniteQuery({
+    queryKey: ['customers', outletId ?? 'all', 'infinite', search ?? ''] as const,
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => {
+      const params: Record<string, unknown> = { page: pageParam, limit: LIST_PAGE_SIZE };
+      if (outletId) params.outlet_id = outletId;
+      if (search) params.search = search;
+      return apiGetPage<Customer>('/customers', params);
+    },
+    getNextPageParam: nextPage,
+  });
+}
+
+export function useInfiniteOrders(filters: OrderFilters, enabled = true) {
+  const params: Record<string, unknown> = { limit: LIST_PAGE_SIZE };
+  if (filters.outlet_id) params.outlet_id = filters.outlet_id;
+  if (filters.customer_id) params.customer_id = filters.customer_id;
+  if (filters.order_status) params.order_status = filters.order_status;
+  if (filters.payment_status) params.payment_status = filters.payment_status;
+  if (filters.search) params.search = filters.search;
+
+  return useInfiniteQuery({
+    queryKey: ['orders', 'infinite', params] as const,
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => apiGetPage<Order>('/orders', { ...params, page: pageParam }),
+    getNextPageParam: nextPage,
+    enabled,
   });
 }
 

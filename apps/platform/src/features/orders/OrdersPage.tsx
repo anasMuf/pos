@@ -2,9 +2,16 @@ import { useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { RefreshCw } from 'lucide-react';
 import { useApp } from '../app/AppContext';
-import { useOrders, useUpdateOrderStatus } from '../../api/queries';
+import { useInfiniteOrders, useUpdateOrderStatus } from '../../api/queries';
 import type { Order, OrderStatus, PaymentStatus } from '../../api/types';
-import { Badge, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  InfiniteScrollSentinel,
+  PageHeader,
+  Spinner,
+} from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Select } from '../../components/atoms/Select';
 import { Input } from '../../components/atoms/Input';
@@ -43,7 +50,17 @@ export function OrdersPage() {
     [activeOutletId, statusFilter, paymentFilter, search],
   );
 
-  const { data: orders = [], isLoading, isFetching, refetch } = useOrders(filters);
+  const {
+    data: orderPages,
+    isLoading,
+    isFetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteOrders(filters);
+  const orders = orderPages?.pages.flatMap((page) => page.items) ?? [];
+  const totalOrders = orderPages?.pages[0]?.meta.total;
   const updateStatus = useUpdateOrderStatus();
   const [receiptOrder, setReceiptOrder] = useState<Order | null>(null);
 
@@ -186,6 +203,13 @@ export function OrdersPage() {
               </div>
             </Card>
           ))}
+          <InfiniteScrollSentinel
+            hasNextPage={!!hasNextPage}
+            isLoading={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+            loadedCount={orders.length}
+            total={totalOrders}
+          />
         </div>
       )}
 

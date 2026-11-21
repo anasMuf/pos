@@ -25,11 +25,11 @@ func NewTenantHandler(s *service.TenantService, access *service.AccessService) *
 // @Router       /tenants [get]
 func (h *TenantHandler) List(c echo.Context) error {
 	page, limit := pagination(c)
-	tenants, _, err := h.service.List(page, limit, c.QueryParam("search"), h.access.TenantIDs(currentUserID(c)))
+	tenants, total, err := h.service.List(page, limit, c.QueryParam("search"), h.access.TenantIDs(currentUserID(c)))
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Tenants retrieved successfully", tenants)
+	return respondPage(c, http.StatusOK, "Tenants retrieved successfully", tenants, page, limit, total)
 }
 
 func (h *TenantHandler) Get(c echo.Context) error {

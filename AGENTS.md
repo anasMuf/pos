@@ -78,6 +78,10 @@ that can switch to offline and sync back idempotently.
   `{FormField,ConfirmDialog,Toast}` plus `molecules/ui` (`PageHeader`, `Card`, `EmptyState`, `AccessDenied`,
   `Spinner`, `Table`, `Badge`, `ErrorAlert`).
 - Use the shared fetch mutator (`src/api/mutator/custom-instance.ts`) and typed hooks.
+- List endpoints return `{message, data: [], meta: {page, limit, total, has_more}}`; list screens use
+  `useInfinite*` hooks (React Query `useInfiniteQuery` + `InfiniteScrollSentinel`), not page buttons.
+  Reference data needed in full (POS products/customers, outlet switcher) is fetched with `limit=100`.
+  Use `apiGetPage` when you need the metadata; `apiGet` still unwraps `data` only.
 - Follow existing Tailwind + indigo palette and the compact card/list style.
 - Feature code lives in `src/features/<feature>/`.
 - POS shortcuts: `F2` focuses search, `F9` checks out, `Esc` closes the item modal.

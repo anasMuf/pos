@@ -310,12 +310,32 @@
                 }
             }
         },
+        "dto.PaginationMeta": {
+            "type": "object",
+            "properties": {
+                "has_more": {
+                    "type": "boolean"
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.SuccessResponse": {
             "type": "object",
             "properties": {
                 "data": {},
                 "message": {
                     "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/dto.PaginationMeta"
                 },
                 "status": {
                     "type": "integer"

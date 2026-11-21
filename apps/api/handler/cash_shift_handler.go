@@ -21,11 +21,11 @@ func NewCashShiftHandler(s *service.CashShiftService, access *service.AccessServ
 func (h *CashShiftHandler) List(c echo.Context) error {
 	page, limit := pagination(c)
 	outletID, _ := strconv.ParseUint(c.QueryParam("outlet_id"), 10, 64)
-	shifts, _, err := h.service.List(page, limit, uint(outletID), c.QueryParam("status"), h.access.OutletIDs(currentUserID(c)))
+	shifts, total, err := h.service.List(page, limit, uint(outletID), c.QueryParam("status"), h.access.OutletIDs(currentUserID(c)))
 	if err != nil {
 		return mapError(err)
 	}
-	return respond(c, http.StatusOK, "Cash shifts retrieved successfully", shifts)
+	return respondPage(c, http.StatusOK, "Cash shifts retrieved successfully", shifts, page, limit, total)
 }
 
 func (h *CashShiftHandler) Get(c echo.Context) error {

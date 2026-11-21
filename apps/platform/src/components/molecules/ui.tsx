@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 export function PageHeader({
   title,
@@ -154,6 +154,70 @@ export function Table({ headers, children }: { headers: string[]; children: Reac
         </thead>
         <tbody className="divide-y divide-gray-100 bg-white">{children}</tbody>
       </table>
+    </div>
+  );
+}
+
+/**
+ * Loads the next page when scrolled into view.
+ *
+ * IntersectionObserver is only an accelerator: the visible button keeps the
+ * control keyboard/screen-reader reachable and works when the observer is
+ * unavailable.
+ */
+export function InfiniteScrollSentinel({
+  hasNextPage,
+  isLoading,
+  onLoadMore,
+  loadedCount,
+  total,
+}: {
+  hasNextPage: boolean;
+  isLoading: boolean;
+  onLoadMore: () => void;
+  loadedCount: number;
+  total?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hasNextPage || isLoading) return;
+    const node = ref.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) onLoadMore();
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasNextPage, isLoading, onLoadMore]);
+
+  if (!hasNextPage) {
+    return (
+      <p className="py-3 text-center text-xs text-gray-500">
+        Menampilkan {loadedCount}
+        {total !== undefined ? ` dari ${total}` : ''} data
+      </p>
+    );
+  }
+
+  return (
+    <div ref={ref} className="flex flex-col items-center gap-2 py-4">
+      <button
+        type="button"
+        onClick={onLoadMore}
+        disabled={isLoading}
+        className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-60"
+      >
+        {isLoading ? 'Memuat…' : 'Muat lebih banyak'}
+      </button>
+      <p className="text-xs text-gray-500">
+        {loadedCount}
+        {total !== undefined ? ` dari ${total}` : ''} data
+      </p>
     </div>
   );
 }
