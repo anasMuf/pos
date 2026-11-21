@@ -7,6 +7,7 @@ import type { MovementType } from '../../api/types';
 import { AccessDenied, Card, PageHeader } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
+import { NumberInput } from '../../components/atoms/NumberInput';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
@@ -176,14 +177,15 @@ export function InventoryMutationPage({
             <Label htmlFor="movement-qty">
               Jumlah {movementType === 'adjustment' ? '(boleh negatif)' : ''}
             </Label>
-            <Input
+            <NumberInput
               id="movement-qty"
-              type="number"
               value={qty}
-              onChange={(event) => {
-                setQty(event.target.value);
+              onChange={(value) => {
+                setQty(value);
                 setErrors({});
               }}
+              min={movementType === 'adjustment' ? undefined : 0}
+              decimals={2}
               className="mt-1"
               aria-invalid={!!errors.qty}
               aria-describedby={errors.qty ? 'movement-qty-error' : undefined}

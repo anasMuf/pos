@@ -27,11 +27,11 @@ describe('NumberInput', () => {
     render(<ControlledNumberInput initialValue="3" />);
     const input = screen.getByLabelText('Qty') as HTMLInputElement;
 
-    fireEvent.click(screen.getByRole('button', { name: 'Tambah' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Naikkan' }));
     expect(input.value).toBe('4');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Kurangi' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Kurangi' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Turunkan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Turunkan' }));
     expect(input.value).toBe('2');
   });
 
@@ -39,19 +39,19 @@ describe('NumberInput', () => {
     render(<ControlledNumberInput initialValue="5" min={0} max={5} />);
     const input = screen.getByLabelText('Qty') as HTMLInputElement;
 
-    fireEvent.click(screen.getByRole('button', { name: 'Tambah' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Naikkan' }));
     expect(input.value).toBe('5');
-    expect((screen.getByRole('button', { name: 'Tambah' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Naikkan' }) as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.change(input, { target: { value: '0' } });
-    expect((screen.getByRole('button', { name: 'Kurangi' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Turunkan' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('steps decimal values without floating point noise', () => {
     render(<ControlledNumberInput initialValue="1.4" decimals={1} />);
     const input = screen.getByLabelText('Qty') as HTMLInputElement;
 
-    fireEvent.click(screen.getByRole('button', { name: 'Tambah' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Naikkan' }));
     expect(input.value).toBe('1.5');
   });
 });

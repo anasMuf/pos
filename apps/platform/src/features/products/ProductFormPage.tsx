@@ -7,6 +7,8 @@ import type { CommissionType, PricingType } from '../../api/types';
 import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
+import { CurrencyInput } from '../../components/atoms/CurrencyInput';
+import { NumberInput } from '../../components/atoms/NumberInput';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
@@ -362,22 +364,21 @@ export function ProductFormPage({ productId }: { productId?: number }) {
           </div>
           <div>
             <Label htmlFor="product-base-price">Harga Dasar</Label>
-            <Input
+            <CurrencyInput
               id="product-base-price"
-              type="number"
-              min={0}
               value={form.base_price}
-              onChange={(event) => setField('base_price', event.target.value)}
+              onChange={(value) => setField('base_price', value)}
               className="mt-1"
             />
           </div>
           <div>
             <Label htmlFor="product-stock">Stok</Label>
-            <Input
+            <NumberInput
               id="product-stock"
-              type="number"
               value={form.stock_qty}
-              onChange={(event) => setField('stock_qty', event.target.value)}
+              onChange={(value) => setField('stock_qty', value)}
+              min={0}
+              decimals={2}
               disabled={!!productId}
               className="mt-1"
             />
@@ -385,11 +386,12 @@ export function ProductFormPage({ productId }: { productId?: number }) {
           </div>
           <div>
             <Label htmlFor="product-min-stock">Stok Minimum</Label>
-            <Input
+            <NumberInput
               id="product-min-stock"
-              type="number"
               value={form.min_stock_qty}
-              onChange={(event) => setField('min_stock_qty', event.target.value)}
+              onChange={(value) => setField('min_stock_qty', value)}
+              min={0}
+              decimals={2}
               className="mt-1"
             />
           </div>
@@ -420,12 +422,12 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               </div>
               <div>
                 <Label htmlFor="product-min-area">Minimum Area</Label>
-                <Input
+                <NumberInput
                   id="product-min-area"
-                  type="number"
-                  min={0}
                   value={form.min_area}
-                  onChange={(event) => setField('min_area', event.target.value)}
+                  onChange={(value) => setField('min_area', value)}
+                  min={0}
+                  decimals={2}
                   className="mt-1"
                 />
               </div>
@@ -459,52 +461,48 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                   <div key={tier.id} className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2">
                     <div>
                       <Label htmlFor={`tier-min-${index}`}>Min Qty</Label>
-                      <Input
+                      <NumberInput
                         id={`tier-min-${index}`}
-                        type="number"
-                        min={1}
                         value={tier.min_qty}
-                        onChange={(event) =>
+                        onChange={(value) =>
                           setField(
                             'tiers',
                             form.tiers.map((item, itemIndex) =>
-                              itemIndex === index ? { ...item, min_qty: event.target.value } : item,
+                              itemIndex === index ? { ...item, min_qty: value } : item,
                             ),
                           )
                         }
+                        min={1}
                         className="mt-1"
                       />
                     </div>
                     <div>
                       <Label htmlFor={`tier-max-${index}`}>Max Qty</Label>
-                      <Input
+                      <NumberInput
                         id={`tier-max-${index}`}
-                        type="number"
-                        min={1}
                         value={tier.max_qty}
-                        onChange={(event) =>
+                        onChange={(value) =>
                           setField(
                             'tiers',
                             form.tiers.map((item, itemIndex) =>
-                              itemIndex === index ? { ...item, max_qty: event.target.value } : item,
+                              itemIndex === index ? { ...item, max_qty: value } : item,
                             ),
                           )
                         }
+                        min={1}
                         className="mt-1"
                       />
                     </div>
                     <div>
                       <Label htmlFor={`tier-price-${index}`}>Harga</Label>
-                      <Input
+                      <CurrencyInput
                         id={`tier-price-${index}`}
-                        type="number"
-                        min={0}
                         value={tier.price}
-                        onChange={(event) =>
+                        onChange={(value) =>
                           setField(
                             'tiers',
                             form.tiers.map((item, itemIndex) =>
-                              itemIndex === index ? { ...item, price: event.target.value } : item,
+                              itemIndex === index ? { ...item, price: value } : item,
                             ),
                           )
                         }
@@ -574,16 +572,14 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                   </div>
                   <div>
                     <Label htmlFor={`modifier-price-${index}`}>Harga</Label>
-                    <Input
+                    <CurrencyInput
                       id={`modifier-price-${index}`}
-                      type="number"
-                      min={0}
                       value={modifier.price}
-                      onChange={(event) =>
+                      onChange={(value) =>
                         setField(
                           'modifiers',
                           form.modifiers.map((item, itemIndex) =>
-                            itemIndex === index ? { ...item, price: event.target.value } : item,
+                            itemIndex === index ? { ...item, price: value } : item,
                           ),
                         )
                       }
@@ -631,14 +627,23 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               </div>
               <div>
                 <Label htmlFor="product-commission-value">Nilai Komisi</Label>
-                <Input
-                  id="product-commission-value"
-                  type="number"
-                  min={0}
-                  value={form.commission_value}
-                  onChange={(event) => setField('commission_value', event.target.value)}
-                  className="mt-1"
-                />
+                {form.commission_type === 'fixed' ? (
+                  <CurrencyInput
+                    id="product-commission-value"
+                    value={form.commission_value}
+                    onChange={(value) => setField('commission_value', value)}
+                    className="mt-1"
+                  />
+                ) : (
+                  <NumberInput
+                    id="product-commission-value"
+                    value={form.commission_value}
+                    onChange={(value) => setField('commission_value', value)}
+                    min={0}
+                    decimals={2}
+                    className="mt-1"
+                  />
+                )}
                 <p className="mt-1 text-xs text-gray-500">
                   {form.commission_type === 'percent'
                     ? 'Contoh: 2 → 2% dari subtotal item'

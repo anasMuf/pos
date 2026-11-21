@@ -89,7 +89,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           type="button"
           onClick={() => handleStep(-1)}
           disabled={!canDecrement}
-          aria-label="Kurangi"
+          aria-label="Turunkan"
           className="flex w-8 items-center justify-center bg-white text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Minus className="h-3.5 w-3.5" />
@@ -98,7 +98,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(functi
           type="button"
           onClick={() => handleStep(1)}
           disabled={!canIncrement}
-          aria-label="Tambah"
+          aria-label="Naikkan"
           className="flex w-8 items-center justify-center border-l border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus className="h-3.5 w-3.5" />

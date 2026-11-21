@@ -14,6 +14,8 @@ import type { OrderStatus, PaymentMethod, PaymentType, Product } from '../../api
 import { Badge, Card, EmptyState, PageHeader, AccessDenied } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
+import { CurrencyInput } from '../../components/atoms/CurrencyInput';
+import { NumberInput } from '../../components/atoms/NumberInput';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { FieldError } from '../../components/atoms/FieldError';
@@ -475,36 +477,34 @@ export function PosPage() {
               <div className="grid grid-cols-3 gap-2 border-t border-gray-100 pt-3">
                 <div>
                   <Label htmlFor="discount-percent">Diskon %</Label>
-                  <Input
+                  <NumberInput
                     id="discount-percent"
-                    type="number"
+                    value={discountPercent}
+                    onChange={setDiscountPercent}
                     min={0}
                     max={100}
-                    value={discountPercent}
-                    onChange={(event) => setDiscountPercent(event.target.value)}
+                    decimals={2}
                     className="mt-1"
                   />
                 </div>
                 <div>
                   <Label htmlFor="discount-amount">Diskon Rp</Label>
-                  <Input
+                  <CurrencyInput
                     id="discount-amount"
-                    type="number"
-                    min={0}
-                    value={discountAmount}
-                    onChange={(event) => setDiscountAmount(event.target.value)}
+                    value={discountAmount === '0' ? '' : discountAmount}
+                    onChange={(value) => setDiscountAmount(value || '0')}
                     className="mt-1"
                   />
                 </div>
                 <div>
                   <Label htmlFor="tax-percent">Pajak %</Label>
-                  <Input
+                  <NumberInput
                     id="tax-percent"
-                    type="number"
+                    value={taxPercent}
+                    onChange={setTaxPercent}
                     min={0}
                     max={100}
-                    value={taxPercent}
-                    onChange={(event) => setTaxPercent(event.target.value)}
+                    decimals={2}
                     className="mt-1"
                   />
                 </div>
@@ -548,13 +548,10 @@ export function PosPage() {
               {paymentType === 'down_payment' && (
                 <div>
                   <Label htmlFor="payment-amount">Nominal DP</Label>
-                  <Input
+                  <CurrencyInput
                     id="payment-amount"
-                    type="number"
-                    min={0}
                     value={paymentAmount}
-                    onChange={(event) => setPaymentAmount(event.target.value)}
-                    placeholder="0"
+                    onChange={setPaymentAmount}
                     className="mt-1"
                   />
                 </div>
@@ -563,17 +560,13 @@ export function PosPage() {
               {paymentMethod === 'cash' && (
                 <div>
                   <Label htmlFor="cash-received">Uang diterima</Label>
-                  <Input
+                  <CurrencyInput
                     id="cash-received"
-                    type="number"
-                    min={0}
-                    inputMode="decimal"
                     value={cashReceived}
-                    onChange={(event) => {
-                      setCashReceived(event.target.value);
+                    onChange={(value) => {
+                      setCashReceived(value);
                       setPaymentError('');
                     }}
-                    placeholder="0"
                     className="mt-1"
                     aria-invalid={!!paymentError}
                     aria-describedby={paymentError ? 'cash-received-error' : undefined}
@@ -747,23 +740,23 @@ function ItemConfigurator({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label htmlFor="width">Lebar ({dimensionUnit})</Label>
-                <Input
+                <NumberInput
                   id="width"
-                  type="number"
-                  min={0}
                   value={width}
-                  onChange={(event) => setWidth(event.target.value)}
+                  onChange={setWidth}
+                  min={0}
+                  decimals={2}
                   className="mt-1"
                 />
               </div>
               <div>
                 <Label htmlFor="height">Tinggi ({dimensionUnit})</Label>
-                <Input
+                <NumberInput
                   id="height"
-                  type="number"
-                  min={0}
                   value={height}
-                  onChange={(event) => setHeight(event.target.value)}
+                  onChange={setHeight}
+                  min={0}
+                  decimals={2}
                   className="mt-1"
                 />
               </div>
@@ -816,12 +809,11 @@ function ItemConfigurator({
           <div className="flex items-end gap-2">
             <div className="flex-1">
               <Label htmlFor="qty">Qty</Label>
-              <Input
+              <NumberInput
                 id="qty"
-                type="number"
+                value={String(qty)}
+                onChange={(value) => setQty(value === '' ? 1 : Math.max(1, Number(value) || 1))}
                 min={1}
-                value={qty}
-                onChange={(event) => setQty(Math.max(1, Number(event.target.value) || 1))}
                 className="mt-1"
               />
             </div>

@@ -5,7 +5,7 @@ import { useApp } from '../app/AppContext';
 import { useCashShifts, useOpenShift } from '../../api/queries';
 import { AccessDenied, Card, PageHeader } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
-import { Input } from '../../components/atoms/Input';
+import { CurrencyInput } from '../../components/atoms/CurrencyInput';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
@@ -85,13 +85,11 @@ export function ShiftOpenPage() {
           <div className="space-y-3">
             <div>
               <Label htmlFor="opening-cash">Kas awal / modal</Label>
-              <Input
+              <CurrencyInput
                 id="opening-cash"
-                type="number"
-                min={0}
                 value={openingCash}
-                onChange={(event) => {
-                  setOpeningCash(event.target.value);
+                onChange={(value) => {
+                  setOpeningCash(value);
                   setError('');
                 }}
                 className="mt-1"

@@ -6,6 +6,8 @@ import { useCreateVariant, useProduct, useUpdateVariant, useVariants } from '../
 import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
+import { CurrencyInput } from '../../components/atoms/CurrencyInput';
+import { NumberInput } from '../../components/atoms/NumberInput';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
@@ -189,15 +191,14 @@ export function VariantFormPage({
           </div>
           <div>
             <Label htmlFor="variant-price">Harga Khusus</Label>
-            <Input
+            <CurrencyInput
               id="variant-price"
-              type="number"
-              min={0}
               value={form.price_override}
-              onChange={(event) => setForm({ ...form, price_override: event.target.value })}
+              onChange={(value) => setForm({ ...form, price_override: value })}
               className="mt-1"
-              placeholder="Kosongkan untuk harga produk"
+              placeholder="0"
             />
+            <p className="mt-1 text-xs text-gray-500">Kosongkan untuk memakai harga produk.</p>
           </div>
           <div>
             <Label htmlFor="variant-stock">Stok</Label>
@@ -219,11 +220,12 @@ export function VariantFormPage({
               </>
             ) : (
               <>
-                <Input
+                <NumberInput
                   id="variant-stock"
-                  type="number"
                   value={form.stock_qty}
-                  onChange={(event) => setForm({ ...form, stock_qty: event.target.value })}
+                  onChange={(value) => setForm({ ...form, stock_qty: value })}
+                  min={0}
+                  decimals={2}
                   className="mt-1"
                   aria-invalid={!!errors.stock_qty}
                   aria-describedby={errors.stock_qty ? 'variant-stock-error' : undefined}
