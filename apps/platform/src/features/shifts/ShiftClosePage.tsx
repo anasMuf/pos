@@ -103,7 +103,12 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
                 <dd className="font-medium text-gray-900">{formatCurrency(shift.opening_cash)}</dd>
               </div>
               <div className="flex justify-between py-2">
-                <dt className="text-gray-500">Kas sistem saat ini</dt>
+                <dt className="text-gray-500">
+                  Kas sistem (seharusnya)
+                  <span className="mt-0.5 block text-xs text-gray-400">
+                    Kas awal + penjualan tunai shift ini
+                  </span>
+                </dt>
                 <dd className="font-medium text-gray-900">{formatCurrency(shift.expected_cash)}</dd>
               </div>
             </dl>
@@ -145,6 +150,15 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
                 </dd>
               </div>
             </dl>
+            {difference !== null && (
+              <p className="text-xs text-gray-600">
+                {Math.abs(difference) < 0.005
+                  ? 'Kas fisik sudah sesuai dengan catatan sistem.'
+                  : difference > 0
+                    ? 'Kas fisik lebih besar dari catatan sistem. Periksa kembalian atau transaksi tunai yang belum tercatat.'
+                    : 'Kas fisik lebih kecil dari catatan sistem. Periksa uang keluar atau pembayaran tunai yang tercatat ganda.'}
+              </p>
+            )}
             <div className="flex gap-2">
               <Button type="button" onClick={handleSubmit} disabled={closeMutation.isPending}>
                 {closeMutation.isPending ? 'Menutup...' : 'Tutup Shift'}

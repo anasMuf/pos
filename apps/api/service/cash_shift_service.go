@@ -32,11 +32,51 @@ func (s *CashShiftService) List(page, limit int, outletID uint, status string, a
 		q = q.Where("status = ?", status)
 	}
 	q = q.Order("id DESC")
-	return s.repo.Paginate(q, page, limit)
+	shifts, total, err := s.repo.Paginate(q, page, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	for i := range shifts {
+		if err := s.applyLiveExpectedCash(&shifts[i]); err != nil {
+			return nil, 0, err
+		}
+	}
+	return shifts, total, nil
 }
 
 func (s *CashShiftService) Get(id uint) (*model.CashShift, error) {
-	return s.repo.FindByID(id)
+	shift, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.applyLiveExpectedCash(shift); err != nil {
+		return nil, err
+	}
+	return shift, nil
+}
+
+// applyLiveExpectedCash recomputes expected cash for open shifts. Without this,
+// an open shift keeps reporting its opening cash even after cash sales, which
+// made the close-shift screen show a bogus "lebih" difference.
+func (s *CashShiftService) applyLiveExpectedCash(shift *model.CashShift) error {
+	if shift.Status != "open" {
+		return nil
+	}
+	received, err := s.cashReceived(shift.ID)
+	if err != nil {
+		return err
+	}
+	shift.ExpectedCash = shift.OpeningCash + received
+	return nil
+}
+
+// cashReceived sums cash payments recorded against a shift.
+func (s *CashShiftService) cashReceived(shiftID uint) (float64, error) {
+	var total float64
+	err := s.db.Model(&model.OrderPayment{}).
+		Where("shift_id = ? AND payment_method = ?", shiftID, "cash").
+		Select("COALESCE(SUM(amount), 0)").Scan(&total).Error
+	return total, err
 }
 
 func (s *CashShiftService) Open(req dto.OpenCashShiftRequest, userID uint) (*model.CashShift, error) {
@@ -71,9 +111,7 @@ func (s *CashShiftService) Close(id uint, closingCash float64) (*model.CashShift
 	}
 
 	var cashReceived float64
-	if err := s.db.Model(&model.OrderPayment{}).
-		Where("shift_id = ? AND payment_method = ?", id, "cash").
-		Select("COALESCE(SUM(amount), 0)").Scan(&cashReceived).Error; err != nil {
+	if cashReceived, err = s.cashReceived(id); err != nil {
 		return nil, err
 	}
 
