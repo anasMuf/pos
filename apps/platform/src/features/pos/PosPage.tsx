@@ -16,6 +16,7 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
+import { FieldError } from '../../components/atoms/FieldError';
 import { useToast } from '../../components/molecules/Toast';
 import { formatCurrency, newClientId } from '../../lib/format';
 import { priceLine } from '../../lib/pricing';
@@ -47,6 +48,8 @@ export function PosPage() {
   const [paymentType, setPaymentType] = useState<PaymentType>('full');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [cashReceived, setCashReceived] = useState('');
+  const [paymentError, setPaymentError] = useState('');
   const [orderStatus, setOrderStatus] = useState<OrderStatus>('completed');
   const [discountPercent, setDiscountPercent] = useState('0');
   const [discountAmount, setDiscountAmount] = useState('0');
@@ -77,6 +80,11 @@ export function PosPage() {
     return taxable + (taxable * (Number(taxPercent) || 0)) / 100;
   })();
 
+  const amountDue =
+    paymentType === 'full' ? total : Math.min(Number(paymentAmount) || 0, total);
+  const parsedCash = cashReceived.trim() === '' ? Number.NaN : Number(cashReceived);
+  const changeDue = Number.isFinite(parsedCash) ? parsedCash - amountDue : null;
+
   const addToCart = (item: CartItem) => {
     setCart((prev) => [...prev, item]);
     setSelectedProduct(null);
@@ -96,6 +104,8 @@ export function PosPage() {
     setCustomerId('');
     setPaymentType('full');
     setPaymentAmount('');
+    setCashReceived('');
+    setPaymentError('');
     setOrderStatus('completed');
     setDiscountPercent('0');
     setDiscountAmount('0');
@@ -123,6 +133,21 @@ export function PosPage() {
     if (paymentType === 'down_payment' && paidAmount <= 0) {
       addToast({ variant: 'error', title: 'Nominal DP tidak valid', message: 'Masukkan nominal DP yang benar.' });
       return;
+    }
+
+    if (paymentMethod === 'cash') {
+      const received = Number(cashReceived);
+      if (cashReceived.trim() === '' || !Number.isFinite(received) || received < paidAmount) {
+        setPaymentError(`Uang diterima minimal ${formatCurrency(paidAmount)}.`);
+        addToast({
+          variant: 'error',
+          title: 'Uang diterima kurang',
+          message: 'Nominal uang diterima harus sama atau lebih besar dari total pembayaran.',
+        });
+        document.getElementById('cash-received')?.focus();
+        return;
+      }
+      setPaymentError('');
     }
 
     const items: OrderItemPayload[] = cart.map((item) => ({
@@ -515,6 +540,34 @@ export function PosPage() {
                     placeholder="0"
                     className="mt-1"
                   />
+                </div>
+              )}
+
+              {paymentMethod === 'cash' && (
+                <div>
+                  <Label htmlFor="cash-received">Uang diterima</Label>
+                  <Input
+                    id="cash-received"
+                    type="number"
+                    min={0}
+                    inputMode="decimal"
+                    value={cashReceived}
+                    onChange={(event) => {
+                      setCashReceived(event.target.value);
+                      setPaymentError('');
+                    }}
+                    placeholder="0"
+                    className="mt-1"
+                    aria-invalid={!!paymentError}
+                    aria-describedby={paymentError ? 'cash-received-error' : undefined}
+                  />
+                  <FieldError id="cash-received-error" message={paymentError} />
+                  <div className="mt-2 flex items-center justify-between text-sm" aria-live="polite">
+                    <span className="text-gray-500">Kembalian</span>
+                    <span className="font-semibold text-gray-900">
+                      {changeDue === null ? '—' : formatCurrency(changeDue)}
+                    </span>
+                  </div>
                 </div>
               )}
 

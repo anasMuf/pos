@@ -44,6 +44,8 @@ test.describe('cashier checkout', () => {
     // Discount 10% and tax 11% are applied by the server.
     await page.getByLabel('Diskon %').fill('10');
     await page.getByLabel('Pajak %').fill('11');
+    // Cash payment requires the tendered amount; change is computed client-side.
+    await page.getByLabel('Uang diterima').fill('1000000');
 
     const [response] = await Promise.all([
       page.waitForResponse(
