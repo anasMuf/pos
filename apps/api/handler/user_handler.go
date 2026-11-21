@@ -48,16 +48,18 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 	})
 }
 
-// CreateUser godoc
-// @Summary      Register new user
-// @Description  Create a new user with the provided details
+// SearchUsers godoc
+// @Summary      Search users
+// @Description  Search users by name, email or username for outlet member assignment. Requires global admin or at least one manageable outlet.
 // @Tags         users
-// @Accept       json
 // @Produce      json
-// @Param        request  body      dto.CreateUserRequest  true  "User registration details"
-// @Success      201      {object}  dto.SuccessResponse
-// @Failure      400      {object}  dto.ErrorResponse
-// @Router       /users/register [post]
+// @Security     ApiKeyAuth
+// @Param        search  query     string  false  "Search term (name, email, username)"
+// @Param        limit   query     int     false  "Maximum number of results (default 20, max 50)"
+// @Success      200     {object}  dto.SuccessResponse{data=[]dto.UserLookupResponse}
+// @Failure      401     {object}  dto.ErrorResponse
+// @Failure      403     {object}  dto.ErrorResponse
+// @Router       /users/search [get]
 func (h *UserHandler) SearchUsers(c echo.Context) error {
 	uid := currentUserID(c)
 	if !h.access.IsGlobalAdmin(uid) && len(h.access.ManageableOutletIDs(uid)) == 0 {
@@ -71,6 +73,16 @@ func (h *UserHandler) SearchUsers(c echo.Context) error {
 	return respond(c, http.StatusOK, "Users retrieved successfully", users)
 }
 
+// CreateUser godoc
+// @Summary      Register new user
+// @Description  Create a new user with the provided details
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.CreateUserRequest  true  "User registration details"
+// @Success      201      {object}  dto.SuccessResponse
+// @Failure      400      {object}  dto.ErrorResponse
+// @Router       /users/register [post]
 func (h *UserHandler) CreateUser(c echo.Context) error {
 	var req dto.CreateUserRequest
 	if err := c.Bind(&req); err != nil {

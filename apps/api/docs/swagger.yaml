@@ -63,6 +63,17 @@ definitions:
       status:
         type: integer
     type: object
+  dto.UserLookupResponse:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -168,6 +179,46 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Register new user
+      tags:
+      - users
+  /users/search:
+    get:
+      description: Search users by name, email or username for outlet member assignment.
+        Requires global admin or at least one manageable outlet.
+      parameters:
+      - description: Search term (name, email, username)
+        in: query
+        name: search
+        type: string
+      - description: Maximum number of results (default 20, max 50)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.UserLookupResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Search users
       tags:
       - users
 securityDefinitions:

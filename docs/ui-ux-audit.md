@@ -53,6 +53,8 @@ untuk perilaku bisnis tetap mengacu ke [`core/prd.md`](core/prd.md), [`core/erd.
 | F-08 | 🟠 P1 | `features/products/VariantFormPage.tsx` | Stok varian diedit langsung | Melewati audit mutasi stok; stok bisa berubah tanpa jejak | Arahkan perubahan stok ke `/inventory/new` atau buat movement `adjustment` otomatis |
 | F-09 | 🟡 P2 | Banyak form | Payment methods, role outlet, paper size, movement type, opsi struk hardcoded | Wajar sebagai konstanta domain, tetapi tersebar | Pusatkan di `src/lib/constants.ts` agar konsisten |
 
+> Status penyelesaian tiap temuan ada di [§6 Roadmap Perbaikan](#6-roadmap-perbaikan).
+
 ---
 
 ## 4. Temuan UX
@@ -71,6 +73,8 @@ untuk perilaku bisnis tetap mengacu ke [`core/prd.md`](core/prd.md), [`core/erd.
 | U-10 | 🟡 P2 | Reports | `from > to` tidak divalidasi; hasil kosong tanpa penjelasan | Validasi rentang tanggal + pesan empty state |
 | U-11 | 🟡 P2 | Semua form | Tidak ada peringatan **unsaved changes** | Guard `beforeunload`/router blocker saat form dirty |
 
+> Status penyelesaian tiap temuan ada di [§6 Roadmap Perbaikan](#6-roadmap-perbaikan).
+
 ---
 
 ## 5. Yang Sudah Baik
@@ -87,36 +91,38 @@ untuk perilaku bisnis tetap mengacu ke [`core/prd.md`](core/prd.md), [`core/erd.
 
 ## 6. Roadmap Perbaikan
 
+Status terakhir diperbarui pada branch `feat/p0-ux-improvements`.
+
 ### P0 — fondasi usability
 
-| Item | Kriteria Penerimaan |
-| --- | --- |
-| U-01 Validasi inline | Setiap field wajib punya pesan error inline, `aria-invalid`, dan fokus otomatis ke field pertama yang gagal; toast tetap ada sebagai ringkasan |
-| U-02 Error state halaman edit | ID tidak ditemukan/`403` menampilkan pesan + tombol kembali; tidak ada form kosong |
-| U-03 Pagination | Respons list menyertakan `meta {page, limit, total}` (update `docs/core/api-contract.md`) dan UI menampilkan navigasi halaman |
-| F-01 Editor pricing/modifier | Tidak ada textarea JSON; data tetap dikirim dengan bentuk yang sama |
-| F-02 Pemilih anggota | Anggota dipilih dari daftar user (nama/email), bukan User ID |
-| F-03 Mutasi stok | Produk → varian (opsional) → stok saat ini → jumlah → estimasi stok akhir |
-| F-04 Kelola tenant | Tenant dapat dibuat/diedit/dihapus dari UI kapan pun |
-| F-05/F-06 Preset konsisten | Definisi preset satu sumber; form create & edit outlet punya preset + Reset |
+| Item | Kriteria Penerimaan | Status | Bukti |
+| --- | --- | --- | --- |
+| U-01 Validasi inline | Setiap field wajib punya pesan error inline, `aria-invalid`, dan fokus otomatis ke field pertama yang gagal; toast tetap ada sebagai ringkasan | ✅ Selesai (fokus otomatis baru di form produk) | `components/atoms/FieldError.tsx`, `ProductFormPage`, `VariantFormPage`, `CustomerFormPage`, `OutletEditPage`, `InventoryMutationPage`, `OrderPaymentPage`, `ShiftOpenPage`, `ShiftClosePage` |
+| U-02 Error state halaman edit | ID tidak ditemukan/`403` menampilkan pesan + tombol kembali; tidak ada form kosong | ✅ Selesai | `EmptyState` di ProductForm, VariantForm, CustomerForm, OutletEdit, OutletCapabilities, ReceiptSettings, OutletMemberForm, ShiftClose, OrderPayment |
+| U-03 Pagination | Respons list menyertakan `meta {page, limit, total}` (update `docs/core/api-contract.md`) dan UI menampilkan navigasi halaman | ⬜ Belum | — |
+| F-01 Editor pricing/modifier | Tidak ada textarea JSON; data tetap dikirim dengan bentuk yang sama | ✅ Selesai | `ProductFormPage` (tier/dimension/modifier editor) |
+| F-02 Pemilih anggota | Anggota dipilih dari daftar user (nama/email), bukan User ID | ✅ Selesai | `GET /api/users/search`, `useSearchUsers`, `OutletMemberFormPage` |
+| F-03 Mutasi stok | Produk → varian (opsional) → stok saat ini → jumlah → estimasi stok akhir | ✅ Selesai | `InventoryMutationPage` |
+| F-04 Kelola tenant | Tenant dapat dibuat/diedit/dihapus dari UI kapan pun | ✅ Selesai | `/tenants`, `/tenants/new`, `/tenants/$id`, `/tenants/$id/edit` |
+| F-05/F-06 Preset konsisten | Definisi preset satu sumber; form create & edit outlet punya preset + Reset | ✅ Selesai | `lib/capabilities.ts` (`CAPABILITY_PRESETS`), `NewOutletPage`, `OutletCapabilitiesPage` |
 
 ### P1 — efisiensi operasional
 
-- U-04 bahasa & keamanan form auth.
-- U-05 uang diterima/kembalian.
-- U-06 catatan item POS.
-- U-07 quick-add pelanggan dari POS.
-- U-08 pratinjau selisih kas shift.
-- F-07 kategori sebagai pilihan.
-- F-08 perubahan stok varian lewat mutasi.
+- ⬜ U-04 bahasa & keamanan form auth.
+- ⬜ U-05 uang diterima/kembalian (validasi sisa tagihan inline sudah ada di `/orders/$id/payment`).
+- ⬜ U-06 catatan item POS.
+- ⬜ U-07 quick-add pelanggan dari POS.
+- ⬜ U-08 pratinjau selisih kas shift.
+- ⬜ F-07 kategori sebagai pilihan.
+- ⬜ F-08 perubahan stok varian lewat mutasi.
 
 ### P2 — polish
 
-- U-09 aksi cepat pelunasan.
-- U-10 validasi filter laporan.
-- U-11 guard unsaved changes.
-- F-09 sentralisasi konstanta domain.
-- (Tambahan) skeleton loading untuk list, bukan spinner penuh.
+- ⬜ U-09 aksi cepat pelunasan (validasi nominal sudah inline).
+- ⬜ U-10 validasi filter laporan.
+- ⬜ U-11 guard unsaved changes.
+- ⬜ F-09 sentralisasi konstanta domain.
+- ⬜ (Tambahan) skeleton loading untuk list, bukan spinner penuh.
 
 ---
 
