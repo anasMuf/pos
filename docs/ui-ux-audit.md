@@ -113,13 +113,15 @@ referensi tidak terpotong default 10.
 
 ### P1 — efisiensi operasional
 
-- ⬜ U-04 bahasa & keamanan form auth.
-- ⬜ U-05 uang diterima/kembalian (validasi sisa tagihan inline sudah ada di `/orders/$id/payment`).
-- ⬜ U-06 catatan item POS.
-- ⬜ U-07 quick-add pelanggan dari POS.
-- ⬜ U-08 pratinjau selisih kas shift.
-- ⬜ F-07 kategori sebagai pilihan.
-- ⬜ F-08 perubahan stok varian lewat mutasi.
+| Item | Status | Bukti |
+| --- | --- | --- |
+| U-04 bahasa & keamanan form auth | ✅ Selesai | Label/copy Indonesia di `login`/`register`, `FormField` mendukung error inline, konfirmasi kata sandi + indikator kekuatan (`lib/password.ts`) |
+| U-05 uang diterima/kembalian | ✅ Selesai | POS: field “Uang diterima” + kembalian live + validasi ≥ nominal (`PosPage`) |
+| U-06 catatan item POS | ✅ Selesai | `ItemConfigurator`: catatan opsional → `meta_data.note`, tampil di keranjang |
+| U-07 quick-add pelanggan dari POS | ✅ Selesai | `QuickCustomerModal` (dialog, bukan route, agar keranjang tidak hilang) |
+| U-08 pratinjau selisih kas shift | ✅ Selesai | `/shifts/$id/close`: kas fisik → selisih live dengan label Lebih/Kurang/Pas |
+| F-07 kategori sebagai pilihan | ✅ Selesai | `ProductFormPage`: `<datalist>` kategori outlet + normalisasi ke ejaan yang sudah ada |
+| F-08 perubahan stok varian lewat mutasi | ✅ Selesai | Stok read-only saat edit varian + tautan `/inventory/new?product_id&variant_id` |
 
 ### P2 — polish
 
