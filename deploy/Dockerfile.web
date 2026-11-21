@@ -1,0 +1,29 @@
+# Multi-stage build for the React platform served by nginx.
+# Build from the repository root: docker build -f deploy/Dockerfile.web .
+
+FROM node:22-alpine AS build
+WORKDIR /repo
+
+RUN npm install -g pnpm@12.21.0
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/platform/package.json apps/platform/package.json
+
+RUN pnpm install --frozen-lockfile --filter platform...
+
+COPY apps/platform ./apps/platform
+
+# Same-origin by default: nginx proxies /api to the api service.
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+RUN pnpm --filter platform build
+
+FROM nginx:1.29-alpine
+
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /repo/apps/platform/dist /usr/share/nginx/html
+
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1/ >/dev/null || exit 1

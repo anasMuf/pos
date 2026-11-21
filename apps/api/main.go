@@ -1,6 +1,6 @@
-// @title           Starter Kit API
+// @title           Universal Multi-Capability POS API
 // @version         1.0
-// @description     Ini adalah API starter kit menggunakan Echo Go.
+// @description     Multi-tenant, multi-outlet, capability-driven POS API.
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support
@@ -21,20 +21,27 @@ package main
 
 import (
 	"api/config"
-	"api/handler"
-	"api/middleware"
-	"api/model"
-	"api/repository"
 	_ "api/docs"
-	"api/service"
-	"api/utility"
+	"api/model"
+	"api/seeders"
+	"api/server"
+	"flag"
+	"log"
 	"os"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"gorm.io/gorm"
 )
+
+func runResetAdmin(db *gorm.DB, args []string) {
+	fs := flag.NewFlagSet("reset-admin", flag.ExitOnError)
+	email := fs.String("email", seeders.DefaultAdminEmail, "admin email")
+	password := fs.String("password", os.Getenv("DEFAULT_ADMIN_PASSWORD"), "new password")
+	_ = fs.Parse(args)
+
+	if err := seeders.ResetAdmin(db, *email, *password); err != nil {
+		log.Fatal("reset-admin: ", err)
+	}
+}
 
 func main() {
 	config.LoadEnv()
@@ -42,36 +49,30 @@ func main() {
 
 	if err := db.AutoMigrate(
 		&model.User{},
+		&model.Tenant{},
+		&model.Outlet{},
+		&model.OutletMember{},
+		&model.Product{},
+		&model.ProductVariant{},
+		&model.StockMovement{},
+		&model.CashShift{},
+		&model.Order{},
+		&model.OrderItem{},
+		&model.OrderPayment{},
+		&model.Customer{},
+		&model.ReceiptSetting{},
 	); err != nil {
 		panic("Gagal auto-migrate tabel: " + err.Error())
 	}
 
-	//repository
-	userRepo := repository.NewUserRepository(db)
-	//service
-	userService := service.NewUserService(userRepo)
-	//handler
-	userHandler := handler.NewUserHandler(userService)
+	seeders.SeedDemo(db)
 
-	e := echo.New()
-	e.Validator = &utility.CustomValidator{Validator: validator.New()}
-	e.Use(middleware.MiddlewareLogging)
-	e.Use(echoMiddleware.CORS())
+	if len(os.Args) > 1 && os.Args[1] == "reset-admin" {
+		runResetAdmin(db, os.Args[2:])
+		return
+	}
 
-	e.HTTPErrorHandler = handler.CustomHTTPErrorHandler
-
-	api := e.Group("/api")
-	api.POST("/users/register", userHandler.CreateUser)
-	api.POST("/users/login", userHandler.LoginUser)
-
-	// Middleware untuk JWT
-	auth := api.Group("")
-	auth.Use(middleware.JWTAuth)
-
-	// GET /api/users
-	auth.GET("/users", userHandler.GetUser)
-
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e := server.New(db)
 
 	port := os.Getenv("PORT")
 	if port == "" {

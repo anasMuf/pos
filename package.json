@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "nx run-many -t dev",
     "build": "nx run-many -t build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nx run-many -t test",
+    "test:api": "pnpm --filter api test",
+    "test:platform": "pnpm --filter platform test",
+    "test:e2e": "pnpm --filter platform test:e2e"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "packageManager": "pnpm@12.21.0",
   "devDependencies": {
     "nx": "^22.7.1"
   }

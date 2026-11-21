@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Ini adalah API starter kit menggunakan Echo Go.",
-        "title": "Starter Kit API",
+        "description": "Multi-tenant, multi-outlet, capability-driven POS API.",
+        "title": "Universal Multi-Capability POS API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
@@ -18,6 +18,27 @@
     "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
+        "/tenants": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "tags": [
+                    "tenants"
+                ],
+                "summary": "List tenants",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -161,21 +182,26 @@
                     "type": "string"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 100
                 },
                 "full_name": {
                     "type": "string",
+                    "maxLength": 100,
                     "minLength": 3
                 },
                 "password": {
                     "type": "string",
+                    "maxLength": 100,
                     "minLength": 6
                 },
                 "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 15
                 },
                 "username": {
                     "type": "string",
+                    "maxLength": 50,
                     "minLength": 3
                 }
             }

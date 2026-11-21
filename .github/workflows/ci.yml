@@ -1,0 +1,232 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  GO_VERSION: '1.25'
+
+jobs:
+  web:
+    name: Web · lint, types, unit, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.21.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter platform lint
+
+      - name: Type check
+        run: pnpm --filter platform exec tsc --noEmit
+
+      - name: Unit & component tests
+        run: pnpm --filter platform test
+
+      - name: Build
+        run: pnpm --filter platform build
+
+  api:
+    name: API · format, vet, build, unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: apps/api/go.sum
+
+      - name: Format check
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "Files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build ./...
+
+      - name: Unit tests
+        run: go test ./tests/unit/...
+
+  integration:
+    name: API · integration
+    runs-on: ubuntu-latest
+    needs: api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'postgres' }}
+          POSTGRES_DB: pos_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pos_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: apps/api
+    env:
+      TEST_DB_DSN: host=127.0.0.1 port=5432 user=postgres password=${{ secrets.CI_DB_PASSWORD || 'postgres' }} dbname=pos_test sslmode=disable
+      JWT_SECRET: ci-integration-secret
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: apps/api/go.sum
+
+      - name: Integration tests
+        run: go test ./tests/integration/...
+
+  e2e:
+    name: E2E · Playwright
+    runs-on: ubuntu-latest
+    needs: [web, integration]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'postgres' }}
+          POSTGRES_DB: pos_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pos_e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'postgres' }}
+      DB_NAME: pos_e2e
+      SSL_MODE: disable
+      PORT: 8080
+      JWT_SECRET: ci-e2e-secret
+      SEED_DEFAULT_ACCOUNT: 'true'
+      VITE_API_URL: http://localhost:8080/api
+      E2E_BASE_URL: http://localhost:3000
+      E2E_API_URL: http://localhost:8080/api
+      E2E_NO_WEBSERVER: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.21.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: apps/api/go.sum
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm --filter platform exec playwright install --with-deps chromium
+
+      - name: Start API
+        run: |
+          cd apps/api
+          nohup go run . > /tmp/api.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/api/health >/dev/null; then
+              echo "API is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API failed to start"
+          cat /tmp/api.log
+          exit 1
+
+      - name: Start web
+        run: |
+          nohup pnpm --filter platform dev > /tmp/web.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:3000 >/dev/null; then
+              echo "Web is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Web failed to start"
+          cat /tmp/web.log
+          exit 1
+
+      - name: Run E2E tests
+        run: pnpm --filter platform exec playwright test --reporter=list
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/platform/playwright-report/
+            apps/platform/test-results/
+          retention-days: 7
+
+  security:
+    name: Dependency audit (critical only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.21.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Only critical advisories block the pipeline; highs are surfaced in the log
+      # so a moving advisory database cannot break unrelated pull requests.
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level critical

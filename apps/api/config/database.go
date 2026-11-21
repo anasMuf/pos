@@ -21,11 +21,12 @@ func DBInit() *gorm.DB {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	name := os.Getenv("DB_NAME")
+	password := os.Getenv("DB_PASSWORD")
 	sslmode := os.Getenv("SSL_MODE")
 
 	dsn := fmt.Sprintf(
-		"host=%s user=%s dbname=%s port=%s sslmode=%s",
-		host, user, name, port, sslmode,
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		host, user, password, name, port, sslmode,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})

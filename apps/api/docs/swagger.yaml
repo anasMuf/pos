@@ -5,16 +5,21 @@ definitions:
       address:
         type: string
       email:
+        maxLength: 100
         type: string
       full_name:
+        maxLength: 100
         minLength: 3
         type: string
       password:
+        maxLength: 100
         minLength: 6
         type: string
       phone:
+        maxLength: 15
         type: string
       username:
+        maxLength: 50
         minLength: 3
         type: string
     required:
@@ -64,14 +69,26 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: Ini adalah API starter kit menggunakan Echo Go.
+  description: Multi-tenant, multi-outlet, capability-driven POS API.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Starter Kit API
+  title: Universal Multi-Capability POS API
   version: "1.0"
 paths:
+  /tenants:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List tenants
+      tags:
+      - tenants
   /users:
     get:
       consumes:

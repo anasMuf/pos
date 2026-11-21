@@ -1,0 +1,44 @@
+name: pos-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: ${DB_NAME:-pos_db}
+    volumes:
+      - pos_prod_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-pos_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      PORT: 8080
+    expose:
+      - "8080"
+
+  web:
+    image: ${IMAGE_PREFIX:?IMAGE_PREFIX is required}-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-80}:80"
+
+volumes:
+  pos_prod_pgdata:

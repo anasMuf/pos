@@ -49,7 +49,7 @@ func (s *userService) CreateUser(req dto.CreateUserRequest) (*dto.UserResponse, 
 	}
 	_, err = s.userRepository.FindByUsername(req.Username)
 	if err == nil {
-		return nil, errors.New("username not found")
+		return nil, errors.New("username already exists")
 	}
 	hash, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
