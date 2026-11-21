@@ -4,22 +4,31 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useCapabilityRegistry, useOutlet, useUpdateCapabilities } from '../../api/queries';
 import type { Capabilities } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { useToast } from '../../components/molecules/Toast';
-import { FALLBACK_CAPABILITIES, emptyCapabilities } from '../../lib/capabilities';
+import { Select } from '../../components/atoms/Select';
+import { Label } from '../../components/atoms/Label';
+import {
+  FALLBACK_CAPABILITIES,
+  capabilitiesForPreset,
+  emptyCapabilities,
+  findCapabilityPreset,
+  CAPABILITY_PRESETS,
+} from '../../lib/capabilities';
 
 export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canManage } = useApp();
-  const { data: outlet, isLoading } = useOutlet(outletId);
+  const { data: outlet, isLoading, isError } = useOutlet(outletId);
   const { data: registry } = useCapabilityRegistry();
   const definitions = registry ?? FALLBACK_CAPABILITIES;
   const updateCapabilities = useUpdateCapabilities(outletId);
   const [capabilities, setCapabilities] = useState<Capabilities>(() =>
     emptyCapabilities(FALLBACK_CAPABILITIES),
   );
+  const [preset, setPreset] = useState('');
 
   useEffect(() => {
     if (outlet) setCapabilities(outlet.capabilities);
@@ -35,6 +44,32 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
   }
 
   if (isLoading) return <Spinner />;
+  if (isError || !outlet) {
+    return (
+      <div>
+        <PageHeader title="Capability Outlet" />
+        <EmptyState
+          title="Outlet tidak ditemukan"
+          description="Outlet tidak tersedia atau Anda tidak memiliki akses."
+          action={
+            <Link to="/outlets" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Outlet
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  const applyPreset = (value: string) => {
+    setPreset(value);
+    setCapabilities(capabilitiesForPreset(definitions, findCapabilityPreset(value)?.capabilities));
+  };
+
+  const resetCapabilities = () => {
+    setPreset('');
+    setCapabilities(capabilitiesForPreset(definitions));
+  };
 
   const handleSubmit = async () => {
     try {
@@ -67,6 +102,26 @@ export function OutletCapabilitiesPage({ outletId }: { outletId: number }) {
       />
 
       <Card>
+        <div className="mb-4 border-b border-gray-100 pb-4">
+          <Label htmlFor="capability-preset">Preset Capability</Label>
+          <div className="mt-1 flex gap-2">
+            <Select id="capability-preset" value={preset} onChange={(event) => applyPreset(event.target.value)}>
+              <option value="">Pilih preset (opsional)</option>
+              {CAPABILITY_PRESETS.map((item) => (
+                <option key={item.key} value={item.key}>
+                  {item.label}
+                </option>
+              ))}
+            </Select>
+            <Button type="button" variant="secondary" onClick={resetCapabilities}>
+              Reset
+            </Button>
+          </div>
+          <p className="mt-1 text-xs text-gray-500">
+            Preset menimpa flag yang ada. Reset mengosongkan semua capability.
+          </p>
+        </div>
+
         <div className="space-y-2">
           {definitions.map((item) => (
             <label key={item.key} className="flex items-start gap-3 rounded-md p-2 hover:bg-gray-50">

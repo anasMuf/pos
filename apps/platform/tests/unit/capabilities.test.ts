@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CAPABILITY_PRESETS,
   FALLBACK_CAPABILITIES,
   capabilitiesForPreset,
   emptyCapabilities,
+  findCapabilityPreset,
 } from '../../src/lib/capabilities';
 
 describe('capability presets', () => {
@@ -42,5 +44,15 @@ describe('capability presets', () => {
     expect(cleared.enable_order_workflow).toBe(false);
     expect(cleared.enable_partial_payment).toBe(false);
     expect(cleared.enable_staff_commission).toBe(false);
+  });
+
+  it('exposes one shared preset list for create and edit pages', () => {
+    expect(CAPABILITY_PRESETS.map((item) => item.key)).toEqual(['retail', 'fnb', 'print', 'clothing']);
+    const print = findCapabilityPreset('print');
+    expect(print?.label).toBe('Percetakan / Sablon');
+    const resolved = capabilitiesForPreset(FALLBACK_CAPABILITIES, print?.capabilities);
+    expect(resolved.enable_dimension_pricing).toBe(true);
+    expect(resolved.enable_partial_payment).toBe(true);
+    expect(findCapabilityPreset('unknown')).toBeUndefined();
   });
 });

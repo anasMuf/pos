@@ -48,7 +48,7 @@ func New(db *gorm.DB) *echo.Echo {
 	reportService := service.NewReportService(db)
 
 	// handlers
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, accessService)
 	tenantHandler := handler.NewTenantHandler(tenantService, accessService)
 	outletHandler := handler.NewOutletHandler(outletService, accessService, outletMemberService)
 	outletMemberHandler := handler.NewOutletMemberHandler(outletMemberService, accessService)
@@ -79,6 +79,7 @@ func New(db *gorm.DB) *echo.Echo {
 	auth := api.Group("")
 	auth.Use(middleware.JWTAuth)
 	auth.GET("/users", userHandler.GetUser)
+	auth.GET("/users/search", userHandler.SearchUsers)
 
 	// Tenants
 	auth.GET("/tenants", tenantHandler.List)

@@ -490,6 +490,7 @@ Source of truth produk ada di [`docs/core/`](docs/core/):
 ```
 docs/
 ├── README.md          ← Workflow dokumentasi (PRD → UX Flow → UI Spec → ERD → API Contract)
+├── ui-ux-audit.md     ← Audit form & UX + backlog perbaikan (P0–P2)
 ├── core/
 │   ├── prd.md
 │   ├── ux-flow.md

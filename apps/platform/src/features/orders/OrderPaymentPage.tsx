@@ -4,24 +4,26 @@ import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useAddPayment, useCashShifts, useOrder } from '../../api/queries';
 import type { PaymentMethod } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 import { formatCurrency, formatDateTime, newClientId } from '../../lib/format';
 
 export function OrderPaymentPage({ orderId }: { orderId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canOperate } = useApp();
-  const { data: order, isLoading } = useOrder(orderId);
+  const { data: order, isLoading, isError } = useOrder(orderId);
   const { data: shifts = [] } = useCashShifts(order?.outlet_id);
   const addPayment = useAddPayment();
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PaymentMethod>('cash');
   const [note, setNote] = useState('');
+  const [error, setError] = useState('');
   const openShift = shifts.find((shift) => shift.status === 'open');
 
   useEffect(() => {
@@ -39,11 +41,19 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
   }
 
   if (isLoading) return <Spinner />;
-  if (!order) {
+  if (isError || !order) {
     return (
       <div>
         <PageHeader title="Pembayaran Pesanan" />
-        <p className="text-sm text-gray-500">Pesanan tidak ditemukan.</p>
+        <EmptyState
+          title="Pesanan tidak ditemukan"
+          description="Pesanan tidak tersedia atau Anda tidak memiliki akses."
+          action={
+            <Link to="/orders" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Pesanan
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -53,9 +63,16 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
   const handleSubmit = async () => {
     const value = Number(amount);
     if (!value || value <= 0) {
-      addToast({ variant: 'error', title: 'Nominal tidak valid', message: 'Masukkan nominal pembayaran.' });
+      setError('Nominal pembayaran harus lebih dari 0.');
+      document.getElementById('payment-amount')?.focus();
       return;
     }
+    if (value > remaining) {
+      setError(`Nominal melebihi sisa tagihan (${formatCurrency(remaining)}).`);
+      document.getElementById('payment-amount')?.focus();
+      return;
+    }
+    setError('');
     try {
       await addPayment.mutateAsync({
         id: orderId,
@@ -119,9 +136,15 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
                 type="number"
                 min={0}
                 value={amount}
-                onChange={(event) => setAmount(event.target.value)}
+                onChange={(event) => {
+                  setAmount(event.target.value);
+                  setError('');
+                }}
                 className="mt-1"
+                aria-invalid={!!error}
+                aria-describedby={error ? 'payment-amount-error' : undefined}
               />
+              <FieldError id="payment-amount-error" message={error} />
             </div>
             <div>
               <Label htmlFor="payment-method">Metode</Label>

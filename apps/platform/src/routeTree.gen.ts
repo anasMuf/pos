@@ -16,12 +16,15 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedPosRouteImport } from './routes/_authenticated/pos'
+import { Route as AuthenticatedTenantsIndexRouteImport } from './routes/_authenticated/tenants/index'
 import { Route as AuthenticatedShiftsIndexRouteImport } from './routes/_authenticated/shifts/index'
 import { Route as AuthenticatedProductsIndexRouteImport } from './routes/_authenticated/products/index'
 import { Route as AuthenticatedOutletsIndexRouteImport } from './routes/_authenticated/outlets/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedInventoryIndexRouteImport } from './routes/_authenticated/inventory/index'
 import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers/index'
+import { Route as AuthenticatedTenantsNewRouteImport } from './routes/_authenticated/tenants/new'
+import { Route as AuthenticatedTenantsIdRouteImport } from './routes/_authenticated/tenants/$id'
 import { Route as AuthenticatedShiftsNewRouteImport } from './routes/_authenticated/shifts/new'
 import { Route as AuthenticatedShiftsIdRouteImport } from './routes/_authenticated/shifts/$id'
 import { Route as AuthenticatedProductsNewRouteImport } from './routes/_authenticated/products/new'
@@ -33,6 +36,7 @@ import { Route as AuthenticatedInventoryNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedCustomersNewRouteImport } from './routes/_authenticated/customers/new'
 import { Route as AuthenticatedCustomersIdRouteImport } from './routes/_authenticated/customers/$id'
 import { Route as AuthenticatedOutletsIdIndexRouteImport } from './routes/_authenticated/outlets/$id.index'
+import { Route as AuthenticatedTenantsIdEditRouteImport } from './routes/_authenticated/tenants/$id.edit'
 import { Route as AuthenticatedShiftsIdCloseRouteImport } from './routes/_authenticated/shifts/$id.close'
 import { Route as AuthenticatedProductsIdVariantsRouteImport } from './routes/_authenticated/products/$id.variants'
 import { Route as AuthenticatedProductsIdEditRouteImport } from './routes/_authenticated/products/$id.edit'
@@ -82,6 +86,12 @@ const AuthenticatedPosRoute = AuthenticatedPosRouteImport.update({
   path: '/pos',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedTenantsIndexRoute =
+  AuthenticatedTenantsIndexRouteImport.update({
+    id: '/tenants/',
+    path: '/tenants/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedShiftsIndexRoute =
   AuthenticatedShiftsIndexRouteImport.update({
     id: '/shifts/',
@@ -118,6 +128,16 @@ const AuthenticatedCustomersIndexRoute =
     path: '/customers/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTenantsNewRoute = AuthenticatedTenantsNewRouteImport.update({
+  id: '/tenants/new',
+  path: '/tenants/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTenantsIdRoute = AuthenticatedTenantsIdRouteImport.update({
+  id: '/tenants/$id',
+  path: '/tenants/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedShiftsNewRoute = AuthenticatedShiftsNewRouteImport.update({
   id: '/shifts/new',
   path: '/shifts/new',
@@ -177,6 +197,12 @@ const AuthenticatedOutletsIdIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedOutletsIdRoute,
+  } as any)
+const AuthenticatedTenantsIdEditRoute =
+  AuthenticatedTenantsIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedTenantsIdRoute,
   } as any)
 const AuthenticatedShiftsIdCloseRoute =
   AuthenticatedShiftsIdCloseRouteImport.update({
@@ -280,12 +306,15 @@ export interface FileRoutesByFullPath {
   '/products/new': typeof AuthenticatedProductsNewRoute
   '/shifts/$id': typeof AuthenticatedShiftsIdRouteWithChildren
   '/shifts/new': typeof AuthenticatedShiftsNewRoute
+  '/tenants/$id': typeof AuthenticatedTenantsIdRouteWithChildren
+  '/tenants/new': typeof AuthenticatedTenantsNewRoute
   '/customers/': typeof AuthenticatedCustomersIndexRoute
   '/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/orders/': typeof AuthenticatedOrdersIndexRoute
   '/outlets/': typeof AuthenticatedOutletsIndexRoute
   '/products/': typeof AuthenticatedProductsIndexRoute
   '/shifts/': typeof AuthenticatedShiftsIndexRoute
+  '/tenants/': typeof AuthenticatedTenantsIndexRoute
   '/customers/$id/edit': typeof AuthenticatedCustomersIdEditRoute
   '/orders/$id/payment': typeof AuthenticatedOrdersIdPaymentRoute
   '/outlets/$id/capabilities': typeof AuthenticatedOutletsIdCapabilitiesRoute
@@ -295,6 +324,7 @@ export interface FileRoutesByFullPath {
   '/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
   '/products/$id/variants': typeof AuthenticatedProductsIdVariantsRouteWithChildren
   '/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
+  '/tenants/$id/edit': typeof AuthenticatedTenantsIdEditRoute
   '/outlets/$id/': typeof AuthenticatedOutletsIdIndexRoute
   '/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
   '/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
@@ -318,12 +348,15 @@ export interface FileRoutesByTo {
   '/products/new': typeof AuthenticatedProductsNewRoute
   '/shifts/$id': typeof AuthenticatedShiftsIdRouteWithChildren
   '/shifts/new': typeof AuthenticatedShiftsNewRoute
+  '/tenants/$id': typeof AuthenticatedTenantsIdRouteWithChildren
+  '/tenants/new': typeof AuthenticatedTenantsNewRoute
   '/customers': typeof AuthenticatedCustomersIndexRoute
   '/inventory': typeof AuthenticatedInventoryIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/outlets': typeof AuthenticatedOutletsIndexRoute
   '/products': typeof AuthenticatedProductsIndexRoute
   '/shifts': typeof AuthenticatedShiftsIndexRoute
+  '/tenants': typeof AuthenticatedTenantsIndexRoute
   '/customers/$id/edit': typeof AuthenticatedCustomersIdEditRoute
   '/orders/$id/payment': typeof AuthenticatedOrdersIdPaymentRoute
   '/outlets/$id/capabilities': typeof AuthenticatedOutletsIdCapabilitiesRoute
@@ -332,6 +365,7 @@ export interface FileRoutesByTo {
   '/outlets/$id/receipt-settings': typeof AuthenticatedOutletsIdReceiptSettingsRoute
   '/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
   '/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
+  '/tenants/$id/edit': typeof AuthenticatedTenantsIdEditRoute
   '/outlets/$id': typeof AuthenticatedOutletsIdIndexRoute
   '/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
   '/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
@@ -358,12 +392,15 @@ export interface FileRoutesById {
   '/_authenticated/products/new': typeof AuthenticatedProductsNewRoute
   '/_authenticated/shifts/$id': typeof AuthenticatedShiftsIdRouteWithChildren
   '/_authenticated/shifts/new': typeof AuthenticatedShiftsNewRoute
+  '/_authenticated/tenants/$id': typeof AuthenticatedTenantsIdRouteWithChildren
+  '/_authenticated/tenants/new': typeof AuthenticatedTenantsNewRoute
   '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
   '/_authenticated/inventory/': typeof AuthenticatedInventoryIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/outlets/': typeof AuthenticatedOutletsIndexRoute
   '/_authenticated/products/': typeof AuthenticatedProductsIndexRoute
   '/_authenticated/shifts/': typeof AuthenticatedShiftsIndexRoute
+  '/_authenticated/tenants/': typeof AuthenticatedTenantsIndexRoute
   '/_authenticated/customers/$id/edit': typeof AuthenticatedCustomersIdEditRoute
   '/_authenticated/orders/$id/payment': typeof AuthenticatedOrdersIdPaymentRoute
   '/_authenticated/outlets/$id/capabilities': typeof AuthenticatedOutletsIdCapabilitiesRoute
@@ -373,6 +410,7 @@ export interface FileRoutesById {
   '/_authenticated/products/$id/edit': typeof AuthenticatedProductsIdEditRoute
   '/_authenticated/products/$id/variants': typeof AuthenticatedProductsIdVariantsRouteWithChildren
   '/_authenticated/shifts/$id/close': typeof AuthenticatedShiftsIdCloseRoute
+  '/_authenticated/tenants/$id/edit': typeof AuthenticatedTenantsIdEditRoute
   '/_authenticated/outlets/$id/': typeof AuthenticatedOutletsIdIndexRoute
   '/_authenticated/outlets/$id/members/new': typeof AuthenticatedOutletsIdMembersNewRoute
   '/_authenticated/products/$id/variants/$variantId': typeof AuthenticatedProductsIdVariantsVariantIdRouteWithChildren
@@ -399,12 +437,15 @@ export interface FileRouteTypes {
     | '/products/new'
     | '/shifts/$id'
     | '/shifts/new'
+    | '/tenants/$id'
+    | '/tenants/new'
     | '/customers/'
     | '/inventory/'
     | '/orders/'
     | '/outlets/'
     | '/products/'
     | '/shifts/'
+    | '/tenants/'
     | '/customers/$id/edit'
     | '/orders/$id/payment'
     | '/outlets/$id/capabilities'
@@ -414,6 +455,7 @@ export interface FileRouteTypes {
     | '/products/$id/edit'
     | '/products/$id/variants'
     | '/shifts/$id/close'
+    | '/tenants/$id/edit'
     | '/outlets/$id/'
     | '/outlets/$id/members/new'
     | '/products/$id/variants/$variantId'
@@ -437,12 +479,15 @@ export interface FileRouteTypes {
     | '/products/new'
     | '/shifts/$id'
     | '/shifts/new'
+    | '/tenants/$id'
+    | '/tenants/new'
     | '/customers'
     | '/inventory'
     | '/orders'
     | '/outlets'
     | '/products'
     | '/shifts'
+    | '/tenants'
     | '/customers/$id/edit'
     | '/orders/$id/payment'
     | '/outlets/$id/capabilities'
@@ -451,6 +496,7 @@ export interface FileRouteTypes {
     | '/outlets/$id/receipt-settings'
     | '/products/$id/edit'
     | '/shifts/$id/close'
+    | '/tenants/$id/edit'
     | '/outlets/$id'
     | '/outlets/$id/members/new'
     | '/products/$id/variants/$variantId'
@@ -476,12 +522,15 @@ export interface FileRouteTypes {
     | '/_authenticated/products/new'
     | '/_authenticated/shifts/$id'
     | '/_authenticated/shifts/new'
+    | '/_authenticated/tenants/$id'
+    | '/_authenticated/tenants/new'
     | '/_authenticated/customers/'
     | '/_authenticated/inventory/'
     | '/_authenticated/orders/'
     | '/_authenticated/outlets/'
     | '/_authenticated/products/'
     | '/_authenticated/shifts/'
+    | '/_authenticated/tenants/'
     | '/_authenticated/customers/$id/edit'
     | '/_authenticated/orders/$id/payment'
     | '/_authenticated/outlets/$id/capabilities'
@@ -491,6 +540,7 @@ export interface FileRouteTypes {
     | '/_authenticated/products/$id/edit'
     | '/_authenticated/products/$id/variants'
     | '/_authenticated/shifts/$id/close'
+    | '/_authenticated/tenants/$id/edit'
     | '/_authenticated/outlets/$id/'
     | '/_authenticated/outlets/$id/members/new'
     | '/_authenticated/products/$id/variants/$variantId'
@@ -556,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPosRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/tenants/': {
+      id: '/_authenticated/tenants/'
+      path: '/tenants'
+      fullPath: '/tenants/'
+      preLoaderRoute: typeof AuthenticatedTenantsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/shifts/': {
       id: '/_authenticated/shifts/'
       path: '/shifts'
@@ -596,6 +653,20 @@ declare module '@tanstack/react-router' {
       path: '/customers'
       fullPath: '/customers/'
       preLoaderRoute: typeof AuthenticatedCustomersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tenants/new': {
+      id: '/_authenticated/tenants/new'
+      path: '/tenants/new'
+      fullPath: '/tenants/new'
+      preLoaderRoute: typeof AuthenticatedTenantsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tenants/$id': {
+      id: '/_authenticated/tenants/$id'
+      path: '/tenants/$id'
+      fullPath: '/tenants/$id'
+      preLoaderRoute: typeof AuthenticatedTenantsIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/shifts/new': {
@@ -674,6 +745,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/outlets/$id/'
       preLoaderRoute: typeof AuthenticatedOutletsIdIndexRouteImport
       parentRoute: typeof AuthenticatedOutletsIdRoute
+    }
+    '/_authenticated/tenants/$id/edit': {
+      id: '/_authenticated/tenants/$id/edit'
+      path: '/edit'
+      fullPath: '/tenants/$id/edit'
+      preLoaderRoute: typeof AuthenticatedTenantsIdEditRouteImport
+      parentRoute: typeof AuthenticatedTenantsIdRoute
     }
     '/_authenticated/shifts/$id/close': {
       id: '/_authenticated/shifts/$id/close'
@@ -909,6 +987,20 @@ const AuthenticatedShiftsIdRouteWithChildren =
     AuthenticatedShiftsIdRouteChildren,
   )
 
+interface AuthenticatedTenantsIdRouteChildren {
+  AuthenticatedTenantsIdEditRoute: typeof AuthenticatedTenantsIdEditRoute
+}
+
+const AuthenticatedTenantsIdRouteChildren: AuthenticatedTenantsIdRouteChildren =
+  {
+    AuthenticatedTenantsIdEditRoute: AuthenticatedTenantsIdEditRoute,
+  }
+
+const AuthenticatedTenantsIdRouteWithChildren =
+  AuthenticatedTenantsIdRoute._addFileChildren(
+    AuthenticatedTenantsIdRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedPosRoute: typeof AuthenticatedPosRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
@@ -924,12 +1016,15 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProductsNewRoute: typeof AuthenticatedProductsNewRoute
   AuthenticatedShiftsIdRoute: typeof AuthenticatedShiftsIdRouteWithChildren
   AuthenticatedShiftsNewRoute: typeof AuthenticatedShiftsNewRoute
+  AuthenticatedTenantsIdRoute: typeof AuthenticatedTenantsIdRouteWithChildren
+  AuthenticatedTenantsNewRoute: typeof AuthenticatedTenantsNewRoute
   AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
   AuthenticatedInventoryIndexRoute: typeof AuthenticatedInventoryIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedOutletsIndexRoute: typeof AuthenticatedOutletsIndexRoute
   AuthenticatedProductsIndexRoute: typeof AuthenticatedProductsIndexRoute
   AuthenticatedShiftsIndexRoute: typeof AuthenticatedShiftsIndexRoute
+  AuthenticatedTenantsIndexRoute: typeof AuthenticatedTenantsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -947,12 +1042,15 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProductsNewRoute: AuthenticatedProductsNewRoute,
   AuthenticatedShiftsIdRoute: AuthenticatedShiftsIdRouteWithChildren,
   AuthenticatedShiftsNewRoute: AuthenticatedShiftsNewRoute,
+  AuthenticatedTenantsIdRoute: AuthenticatedTenantsIdRouteWithChildren,
+  AuthenticatedTenantsNewRoute: AuthenticatedTenantsNewRoute,
   AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
   AuthenticatedInventoryIndexRoute: AuthenticatedInventoryIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedOutletsIndexRoute: AuthenticatedOutletsIndexRoute,
   AuthenticatedProductsIndexRoute: AuthenticatedProductsIndexRoute,
   AuthenticatedShiftsIndexRoute: AuthenticatedShiftsIndexRoute,
+  AuthenticatedTenantsIndexRoute: AuthenticatedTenantsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

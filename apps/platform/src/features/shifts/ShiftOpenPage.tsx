@@ -8,6 +8,7 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 export function ShiftOpenPage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function ShiftOpenPage() {
   const openShift = shifts.find((shift) => shift.status === 'open');
   const openMutation = useOpenShift();
   const [openingCash, setOpeningCash] = useState('0');
+  const [error, setError] = useState('');
 
   if (!canOperate) {
     return (
@@ -32,8 +34,15 @@ export function ShiftOpenPage() {
       addToast({ variant: 'error', title: 'Outlet belum dipilih', message: 'Pilih outlet terlebih dahulu.' });
       return;
     }
+    const value = Number(openingCash);
+    if (openingCash === '' || Number.isNaN(value) || value < 0) {
+      setError('Kas awal harus berupa angka 0 atau lebih.');
+      document.getElementById('opening-cash')?.focus();
+      return;
+    }
+    setError('');
     try {
-      await openMutation.mutateAsync({ outlet_id: activeOutletId, opening_cash: Number(openingCash) || 0 });
+      await openMutation.mutateAsync({ outlet_id: activeOutletId, opening_cash: value });
       addToast({ variant: 'success', title: 'Shift dibuka', message: 'Kas awal tercatat.' });
       navigate({ to: '/shifts' });
     } catch (error) {
@@ -81,9 +90,15 @@ export function ShiftOpenPage() {
                 type="number"
                 min={0}
                 value={openingCash}
-                onChange={(event) => setOpeningCash(event.target.value)}
+                onChange={(event) => {
+                  setOpeningCash(event.target.value);
+                  setError('');
+                }}
                 className="mt-1"
+                aria-invalid={!!error}
+                aria-describedby={error ? 'opening-cash-error' : undefined}
               />
+              <FieldError id="opening-cash-error" message={error} />
             </div>
             <div className="flex gap-2">
               <Button type="button" onClick={handleSubmit} disabled={openMutation.isPending}>

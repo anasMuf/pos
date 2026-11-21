@@ -1,59 +1,120 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useCreateProduct, useProduct, useUpdateProduct } from '../../api/queries';
 import type { CommissionType, PricingType } from '../../api/types';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { newClientId } from '../../lib/format';
 
-const textareaClass =
-  'block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 font-mono';
+interface TierRow {
+  id: string;
+  min_qty: string;
+  max_qty: string;
+  price: string;
+}
 
-const EMPTY_FORM = {
+interface ModifierRow {
+  id: string;
+  name: string;
+  price: string;
+}
+
+interface ProductFormState {
+  name: string;
+  sku: string;
+  category: string;
+  pricing_type: PricingType;
+  base_price: string;
+  track_inventory: boolean;
+  stock_qty: string;
+  min_stock_qty: string;
+  dimension_unit: string;
+  min_area: string;
+  tiers: TierRow[];
+  modifiers: ModifierRow[];
+  commission_type: CommissionType;
+  commission_value: string;
+}
+
+interface FormErrors {
+  name?: string;
+  sku?: string;
+  category?: string;
+  tiers?: string;
+  modifiers?: string;
+}
+
+const EMPTY_FORM: ProductFormState = {
   name: '',
   sku: '',
   category: '',
-  pricing_type: 'fixed' as PricingType,
+  pricing_type: 'fixed',
   base_price: '',
   track_inventory: true,
   stock_qty: '0',
   min_stock_qty: '0',
-  pricing_rules: '{}',
-  modifiers_config: '[]',
-  commission_type: 'none' as CommissionType,
+  dimension_unit: 'm',
+  min_area: '1',
+  tiers: [],
+  modifiers: [],
+  commission_type: 'none',
   commission_value: '0',
 };
+
+function parseProductForm(product: NonNullable<ReturnType<typeof useProduct>['data']>): ProductFormState {
+  const rules = (product.pricing_rules ?? {}) as {
+    unit?: string;
+    min_area?: number;
+    tiers?: { min_qty?: number; max_qty?: number; price?: number }[];
+  };
+  const modifiers = Array.isArray(product.modifiers_config)
+    ? (product.modifiers_config as { name?: string; price?: number }[])
+    : [];
+  return {
+    name: product.name,
+    sku: product.sku,
+    category: product.category,
+    pricing_type: product.pricing_type,
+    base_price: String(product.base_price),
+    track_inventory: product.track_inventory,
+    stock_qty: String(product.stock_qty),
+    min_stock_qty: String(product.min_stock_qty),
+    dimension_unit: rules.unit ?? 'm',
+    min_area: String(rules.min_area ?? 1),
+    tiers: (rules.tiers ?? []).map((tier) => ({
+      id: newClientId('tier'),
+      min_qty: String(tier.min_qty ?? ''),
+      max_qty: String(tier.max_qty ?? ''),
+      price: String(tier.price ?? ''),
+    })),
+    modifiers: modifiers.map((modifier) => ({
+      id: newClientId('mod'),
+      name: modifier.name ?? '',
+      price: String(modifier.price ?? ''),
+    })),
+    commission_type: product.commission_type ?? 'none',
+    commission_value: String(product.commission_value ?? 0),
+  };
+}
 
 export function ProductFormPage({ productId }: { productId?: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { activeOutletId, activeOutlet, canManage } = useApp();
-  const { data: product, isLoading } = useProduct(productId ?? null);
+  const { data: product, isLoading, isError } = useProduct(productId ?? null);
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
-    if (!product) return;
-    setForm({
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      pricing_type: product.pricing_type,
-      base_price: String(product.base_price),
-      track_inventory: product.track_inventory,
-      stock_qty: String(product.stock_qty),
-      min_stock_qty: String(product.min_stock_qty),
-      pricing_rules: JSON.stringify(product.pricing_rules ?? {}),
-      modifiers_config: JSON.stringify(product.modifiers_config ?? []),
-      commission_type: product.commission_type ?? 'none',
-      commission_value: String(product.commission_value ?? 0),
-    });
+    if (product) setForm(parseProductForm(product));
   }, [product]);
 
   if (!canManage) {
@@ -66,39 +127,94 @@ export function ProductFormPage({ productId }: { productId?: number }) {
   }
 
   if (productId && isLoading) return <Spinner />;
+  if (productId && (isError || !product)) {
+    return (
+      <div>
+        <PageHeader title="Edit Produk" />
+        <EmptyState
+          title="Produk tidak ditemukan"
+          description="Produk tidak tersedia atau Anda tidak memiliki akses ke outletnya."
+          action={
+            <Link to="/products" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Produk
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
+
+  const setField = <K extends keyof ProductFormState>(key: K, value: ProductFormState[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (key in errors) {
+      setErrors((prev) => ({ ...prev, [key]: undefined }));
+    }
+  };
+
+  const validate = () => {
+    const next: FormErrors = {};
+    if (form.name.trim().length < 2) next.name = 'Nama produk minimal 2 karakter.';
+    if (!form.sku.trim()) next.sku = 'SKU wajib diisi.';
+    if (!form.category.trim()) next.category = 'Kategori wajib diisi.';
+
+    if (form.pricing_type === 'tiered') {
+      if (form.tiers.length === 0) {
+        next.tiers = 'Tambahkan minimal satu tier harga.';
+      } else {
+        const invalid = form.tiers.some((tier) => {
+          const min = Number(tier.min_qty);
+          const max = Number(tier.max_qty);
+          const price = Number(tier.price);
+          return !min || !max || max < min || Number.isNaN(price) || price < 0;
+        });
+        if (invalid) next.tiers = 'Periksa min qty, max qty, dan harga tier.';
+      }
+    }
+
+    const invalidModifier = form.modifiers.some(
+      (modifier) => (modifier.name.trim() || modifier.price) && (!modifier.name.trim() || Number(modifier.price) < 0),
+    );
+    if (invalidModifier) next.modifiers = 'Nama modifier wajib diisi dan harga tidak boleh negatif.';
+
+    setErrors(next);
+    const firstInvalid = Object.keys(next)[0];
+    if (firstInvalid) document.getElementById(`product-${firstInvalid}`)?.focus();
+    return Object.keys(next).length === 0;
+  };
 
   const handleSubmit = async () => {
-    if (!form.name || !form.sku || !form.category) {
-      addToast({ variant: 'error', title: 'Data belum lengkap', message: 'Nama, SKU, dan kategori wajib diisi.' });
-      return;
-    }
+    if (!validate()) return;
     if (!productId && !activeOutletId) {
       addToast({ variant: 'error', title: 'Outlet belum dipilih', message: 'Pilih outlet terlebih dahulu.' });
       return;
     }
 
     let pricingRules: Record<string, unknown> = {};
-    let modifiersConfig: unknown[] = [];
-    try {
-      pricingRules = JSON.parse(form.pricing_rules || '{}');
-      const parsedModifiers = JSON.parse(form.modifiers_config || '[]');
-      if (!Array.isArray(parsedModifiers)) throw new Error('modifiers harus array');
-      modifiersConfig = parsedModifiers;
-    } catch {
-      addToast({ variant: 'error', title: 'JSON tidak valid', message: 'Periksa format pricing rules / modifiers.' });
-      return;
+    if (form.pricing_type === 'dimension') {
+      pricingRules = { unit: form.dimension_unit || 'm', min_area: Number(form.min_area) || 0 };
+    } else if (form.pricing_type === 'tiered') {
+      pricingRules = {
+        tiers: form.tiers.map((tier) => ({
+          min_qty: Number(tier.min_qty),
+          max_qty: Number(tier.max_qty),
+          price: Number(tier.price),
+        })),
+      };
     }
+    const modifiers = form.modifiers
+      .filter((modifier) => modifier.name.trim())
+      .map((modifier) => ({ name: modifier.name.trim(), price: Number(modifier.price) || 0 }));
 
     const payload = {
-      name: form.name,
-      sku: form.sku,
-      category: form.category,
+      name: form.name.trim(),
+      sku: form.sku.trim(),
+      category: form.category.trim(),
       pricing_type: form.pricing_type,
       base_price: Number(form.base_price) || 0,
       track_inventory: form.track_inventory,
       min_stock_qty: Number(form.min_stock_qty) || 0,
       pricing_rules: pricingRules,
-      modifiers_config: modifiersConfig as Record<string, unknown>[],
+      modifiers_config: modifiers,
       commission_type: form.commission_type,
       commission_value: Number(form.commission_value) || 0,
     };
@@ -150,34 +266,55 @@ export function ProductFormPage({ productId }: { productId?: number }) {
             <Input
               id="product-name"
               value={form.name}
-              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              onChange={(event) => setField('name', event.target.value)}
               className="mt-1"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'product-name-error' : undefined}
             />
+            {errors.name && (
+              <p id="product-name-error" role="alert" className="mt-1 text-xs text-red-600">
+                {errors.name}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="product-sku">SKU</Label>
             <Input
               id="product-sku"
               value={form.sku}
-              onChange={(event) => setForm({ ...form, sku: event.target.value })}
+              onChange={(event) => setField('sku', event.target.value)}
               className="mt-1"
+              aria-invalid={!!errors.sku}
+              aria-describedby={errors.sku ? 'product-sku-error' : undefined}
             />
+            {errors.sku && (
+              <p id="product-sku-error" role="alert" className="mt-1 text-xs text-red-600">
+                {errors.sku}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="product-category">Kategori</Label>
             <Input
               id="product-category"
               value={form.category}
-              onChange={(event) => setForm({ ...form, category: event.target.value })}
+              onChange={(event) => setField('category', event.target.value)}
               className="mt-1"
+              aria-invalid={!!errors.category}
+              aria-describedby={errors.category ? 'product-category-error' : undefined}
             />
+            {errors.category && (
+              <p id="product-category-error" role="alert" className="mt-1 text-xs text-red-600">
+                {errors.category}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="product-pricing">Tipe Harga</Label>
             <Select
               id="product-pricing"
               value={form.pricing_type}
-              onChange={(event) => setForm({ ...form, pricing_type: event.target.value as PricingType })}
+              onChange={(event) => setField('pricing_type', event.target.value as PricingType)}
               className="mt-1"
             >
               <option value="fixed">Fixed</option>
@@ -192,7 +329,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               type="number"
               min={0}
               value={form.base_price}
-              onChange={(event) => setForm({ ...form, base_price: event.target.value })}
+              onChange={(event) => setField('base_price', event.target.value)}
               className="mt-1"
             />
           </div>
@@ -202,7 +339,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               id="product-stock"
               type="number"
               value={form.stock_qty}
-              onChange={(event) => setForm({ ...form, stock_qty: event.target.value })}
+              onChange={(event) => setField('stock_qty', event.target.value)}
               disabled={!!productId}
               className="mt-1"
             />
@@ -214,7 +351,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               id="product-min-stock"
               type="number"
               value={form.min_stock_qty}
-              onChange={(event) => setForm({ ...form, min_stock_qty: event.target.value })}
+              onChange={(event) => setField('min_stock_qty', event.target.value)}
               className="mt-1"
             />
           </div>
@@ -223,42 +360,230 @@ export function ProductFormPage({ productId }: { productId?: number }) {
               id="product-track"
               type="checkbox"
               checked={form.track_inventory}
-              onChange={(event) => setForm({ ...form, track_inventory: event.target.checked })}
+              onChange={(event) => setField('track_inventory', event.target.checked)}
             />
             <Label htmlFor="product-track">Lacak stok</Label>
           </div>
-          <div className="sm:col-span-2 lg:col-span-3">
-            <Label htmlFor="product-rules">Pricing Rules (JSON)</Label>
-            <textarea
-              id="product-rules"
-              value={form.pricing_rules}
-              onChange={(event) => setForm({ ...form, pricing_rules: event.target.value })}
-              rows={2}
-              className={`mt-1 ${textareaClass}`}
-              placeholder='Contoh dimension: {"unit":"m","min_area":1} / tiered: {"tiers":[...]}'
-            />
+        </div>
+
+        {form.pricing_type === 'dimension' && (
+          <div className="mt-6 border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-gray-900">Harga Dimensi</h3>
+            <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="product-dimension-unit">Satuan</Label>
+                <Input
+                  id="product-dimension-unit"
+                  value={form.dimension_unit}
+                  onChange={(event) => setField('dimension_unit', event.target.value)}
+                  className="mt-1"
+                  placeholder="m"
+                />
+              </div>
+              <div>
+                <Label htmlFor="product-min-area">Minimum Area</Label>
+                <Input
+                  id="product-min-area"
+                  type="number"
+                  min={0}
+                  value={form.min_area}
+                  onChange={(event) => setField('min_area', event.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </div>
           </div>
-          <div className="sm:col-span-2 lg:col-span-3">
-            <Label htmlFor="product-modifiers">Modifiers (JSON array)</Label>
-            <textarea
-              id="product-modifiers"
-              value={form.modifiers_config}
-              onChange={(event) => setForm({ ...form, modifiers_config: event.target.value })}
-              rows={2}
-              className={`mt-1 ${textareaClass}`}
-              placeholder='[{"name":"Mata Ayam","price":2000}]'
-            />
+        )}
+
+        {form.pricing_type === 'tiered' && (
+          <div className="mt-6 border-t border-gray-100 pt-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-900">Tier Harga</h3>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() =>
+                  setField('tiers', [
+                    ...form.tiers,
+                    { id: newClientId('tier'), min_qty: '', max_qty: '', price: '' },
+                  ])
+                }
+              >
+                <Plus className="mr-1 h-3.5 w-3.5" /> Tier
+              </Button>
+            </div>
+            {form.tiers.length === 0 ? (
+              <p className="mt-2 text-sm text-gray-500">Belum ada tier. Tambahkan minimal satu tier.</p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {form.tiers.map((tier, index) => (
+                  <div key={tier.id} className="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2">
+                    <div>
+                      <Label htmlFor={`tier-min-${index}`}>Min Qty</Label>
+                      <Input
+                        id={`tier-min-${index}`}
+                        type="number"
+                        min={1}
+                        value={tier.min_qty}
+                        onChange={(event) =>
+                          setField(
+                            'tiers',
+                            form.tiers.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, min_qty: event.target.value } : item,
+                            ),
+                          )
+                        }
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`tier-max-${index}`}>Max Qty</Label>
+                      <Input
+                        id={`tier-max-${index}`}
+                        type="number"
+                        min={1}
+                        value={tier.max_qty}
+                        onChange={(event) =>
+                          setField(
+                            'tiers',
+                            form.tiers.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, max_qty: event.target.value } : item,
+                            ),
+                          )
+                        }
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`tier-price-${index}`}>Harga</Label>
+                      <Input
+                        id={`tier-price-${index}`}
+                        type="number"
+                        min={0}
+                        value={tier.price}
+                        onChange={(event) =>
+                          setField(
+                            'tiers',
+                            form.tiers.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, price: event.target.value } : item,
+                            ),
+                          )
+                        }
+                        className="mt-1"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label="Hapus tier"
+                      onClick={() => setField('tiers', form.tiers.filter((_, itemIndex) => itemIndex !== index))}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {errors.tiers && (
+              <p role="alert" className="mt-2 text-xs text-red-600">
+                {errors.tiers}
+              </p>
+            )}
           </div>
-          {showCommission && (
-            <>
+        )}
+
+        <div className="mt-6 border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900">Modifier / Tambahan</h3>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() =>
+                setField('modifiers', [
+                  ...form.modifiers,
+                  { id: newClientId('mod'), name: '', price: '0' },
+                ])
+              }
+            >
+              <Plus className="mr-1 h-3.5 w-3.5" /> Modifier
+            </Button>
+          </div>
+          {form.modifiers.length === 0 ? (
+            <p className="mt-2 text-sm text-gray-500">Belum ada modifier.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {form.modifiers.map((modifier, index) => (
+                <div key={modifier.id} className="grid grid-cols-[1fr_160px_auto] items-end gap-2">
+                  <div>
+                    <Label htmlFor={`modifier-name-${index}`}>Nama</Label>
+                    <Input
+                      id={`modifier-name-${index}`}
+                      value={modifier.name}
+                      onChange={(event) =>
+                        setField(
+                          'modifiers',
+                          form.modifiers.map((item, itemIndex) =>
+                            itemIndex === index ? { ...item, name: event.target.value } : item,
+                          ),
+                        )
+                      }
+                      className="mt-1"
+                      placeholder="Mata Ayam"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`modifier-price-${index}`}>Harga</Label>
+                    <Input
+                      id={`modifier-price-${index}`}
+                      type="number"
+                      min={0}
+                      value={modifier.price}
+                      onChange={(event) =>
+                        setField(
+                          'modifiers',
+                          form.modifiers.map((item, itemIndex) =>
+                            itemIndex === index ? { ...item, price: event.target.value } : item,
+                          ),
+                        )
+                      }
+                      className="mt-1"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Hapus modifier"
+                    onClick={() =>
+                      setField('modifiers', form.modifiers.filter((_, itemIndex) => itemIndex !== index))
+                    }
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          {errors.modifiers && (
+            <p role="alert" className="mt-2 text-xs text-red-600">
+              {errors.modifiers}
+            </p>
+          )}
+        </div>
+
+        {showCommission && (
+          <div className="mt-6 border-t border-gray-100 pt-4">
+            <h3 className="text-sm font-semibold text-gray-900">Komisi Staf</h3>
+            <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="product-commission-type">Tipe Komisi</Label>
                 <Select
                   id="product-commission-type"
                   value={form.commission_type}
-                  onChange={(event) =>
-                    setForm({ ...form, commission_type: event.target.value as CommissionType })
-                  }
+                  onChange={(event) => setField('commission_type', event.target.value as CommissionType)}
                   className="mt-1"
                 >
                   <option value="none">Tanpa komisi</option>
@@ -273,7 +598,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                   type="number"
                   min={0}
                   value={form.commission_value}
-                  onChange={(event) => setForm({ ...form, commission_value: event.target.value })}
+                  onChange={(event) => setField('commission_value', event.target.value)}
                   className="mt-1"
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -282,11 +607,11 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                     : 'Contoh: 1000 → Rp1.000 per unit terjual'}
                 </p>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-6 flex flex-wrap gap-2 border-t border-gray-100 pt-4">
           <Button type="button" onClick={handleSubmit} disabled={saving}>
             {saving ? 'Menyimpan...' : productId ? 'Simpan Perubahan' : 'Simpan Produk'}
           </Button>

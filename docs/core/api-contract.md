@@ -2366,6 +2366,42 @@ Response `200 OK`:
 
 ---
 
+### 13. Users
+
+Endpoint pendukung untuk memilih pengguna saat menetapkan anggota outlet (dipakai form anggota outlet,
+alih-alih meminta `user_id` mentah).
+
+#### Search Users
+
+```http
+GET /api/users/search?search=budi&limit=20
+
+```
+
+Query Parameters: `search` (nama, username, atau email; opsional), `limit` (default 20, maksimum 50).
+
+Akses: global admin **atau** pengguna yang memiliki minimal satu outlet yang dapat dikelola.
+Selain itu respons `403`.
+
+Response `200 OK`:
+
+```json
+{
+  "message": "Users retrieved successfully",
+  "data": [
+    {
+      "id": 3,
+      "full_name": "Budi Santoso",
+      "username": "budi",
+      "email": "budi@example.com"
+    }
+  ]
+}
+
+```
+
+---
+
 ## HTTP Status Codes
 
 | Code | Keterangan |

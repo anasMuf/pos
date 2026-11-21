@@ -48,6 +48,27 @@ test.describe('dedicated form pages', () => {
     await page.goto(`/outlets/${outlet.id}/members/new`);
     await expect(page.getByRole('heading', { name: 'Tambah Anggota Outlet' })).toBeVisible();
 
+    await page.goto('/tenants');
+    await expect(page.getByRole('heading', { name: 'Tenant', exact: true })).toBeVisible();
+    await page.goto('/tenants/new');
+    await expect(page.getByRole('heading', { name: 'Tenant Baru' })).toBeVisible();
+    const tenantResponse = await request.get(`${API_URL}/tenants`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const tenants = (await tenantResponse.json()).data as { id: number; name: string }[];
+    if (tenants.length > 0) {
+      await page.goto(`/tenants/${tenants[0].id}/edit`);
+      await expect(
+        page.getByRole('heading', { name: `Edit Tenant · ${tenants[0].name}` }),
+      ).toBeVisible();
+    }
+
+    // Missing entities show a clear error state instead of an empty form.
+    await page.goto('/products/999999/edit');
+    await expect(page.getByRole('heading', { name: 'Produk tidak ditemukan' })).toBeVisible();
+    await page.goto('/customers/999999/edit');
+    await expect(page.getByRole('heading', { name: 'Pelanggan tidak ditemukan' })).toBeVisible();
+
     const ordersResponse = await request.get(`${API_URL}/orders?outlet_id=${outlet.id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });

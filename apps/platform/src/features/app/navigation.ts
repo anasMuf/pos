@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Boxes,
+  Building2,
   ClipboardList,
   Clock,
   LayoutDashboard,
@@ -21,6 +22,7 @@ export type AppPath =
   | '/inventory'
   | '/products'
   | '/outlets'
+  | '/tenants'
   | '/reports'
   | '/settings';
 
@@ -43,6 +45,7 @@ export const navItems: NavItem[] = [
   { to: '/inventory', label: 'Inventori', icon: Boxes, requires: 'view' },
   { to: '/products', label: 'Produk', icon: Package, requires: 'view' },
   { to: '/outlets', label: 'Outlet', icon: Store, requires: 'manage' },
+  { to: '/tenants', label: 'Tenant', icon: Building2, requires: 'manage' },
   { to: '/reports', label: 'Laporan', icon: BarChart3, requires: 'manage' },
   { to: '/settings', label: 'Pengaturan', icon: Settings, requires: 'view' },
 ];

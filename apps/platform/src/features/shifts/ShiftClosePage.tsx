@@ -8,15 +8,17 @@ import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 import { formatCurrency, formatDateTime } from '../../lib/format';
 
 export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { canOperate } = useApp();
-  const { data: shift, isLoading } = useCashShift(shiftId);
+  const { data: shift, isLoading, isError } = useCashShift(shiftId);
   const closeMutation = useCloseShift();
   const [closingCash, setClosingCash] = useState('');
+  const [error, setError] = useState('');
 
   if (!canOperate) {
     return (
@@ -28,7 +30,7 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   }
 
   if (isLoading) return <Spinner />;
-  if (!shift) {
+  if (isError || !shift) {
     return (
       <div>
         <PageHeader title="Tutup Shift" />
@@ -40,9 +42,11 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   const handleSubmit = async () => {
     const value = Number(closingCash);
     if (!closingCash || Number.isNaN(value) || value < 0) {
-      addToast({ variant: 'error', title: 'Kas akhir tidak valid', message: 'Masukkan kas fisik akhir shift.' });
+      setError('Kas fisik akhir harus berupa angka 0 atau lebih.');
+      document.getElementById('closing-cash')?.focus();
       return;
     }
+    setError('');
     try {
       const closed = await closeMutation.mutateAsync({ id: shiftId, closing_cash: value });
       addToast({
@@ -100,10 +104,16 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
                 type="number"
                 min={0}
                 value={closingCash}
-                onChange={(event) => setClosingCash(event.target.value)}
+                onChange={(event) => {
+                  setClosingCash(event.target.value);
+                  setError('');
+                }}
                 placeholder="0"
                 className="mt-1"
+                aria-invalid={!!error}
+                aria-describedby={error ? 'closing-cash-error' : undefined}
               />
+              <FieldError id="closing-cash-error" message={error} />
             </div>
             <div className="flex gap-2">
               <Button type="button" onClick={handleSubmit} disabled={closeMutation.isPending}>

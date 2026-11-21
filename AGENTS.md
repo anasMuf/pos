@@ -66,10 +66,17 @@ that can switch to offline and sync back idempotently.
 
 - File-based routes in `src/routes`; protected pages under `_authenticated/`.
 - **Setiap form tambah/edit punya route sendiri** (`/products/new`, `/products/$id/edit`,
-  `/customers/$id/edit`, `/inventory/new`, `/shifts/new`, `/outlets/$id/edit`, dst). Halaman list/detail
-  hanya menautkan ke route tersebut; jangan menaruh form CRUD inline atau di modal. Pengecualian:
-  `ItemConfigurator` di POS (alur transaksi) dan `ReceiptModal` (preview).
-- Atomic components: `components/atoms/{Button,Input,Label,Alert}`; molecules: `{FormField,ConfirmDialog,Toast}`.
+  `/customers/$id/edit`, `/inventory/new`, `/shifts/new`, `/outlets/$id/edit`, `/tenants/$id/edit`, dst).
+  Halaman list/detail hanya menautkan ke route tersebut; jangan menaruh form CRUD inline atau di modal.
+  Pengecualian: `ItemConfigurator` di POS (alur transaksi) dan `ReceiptModal` (preview).
+- Form wajib punya validasi inline per field (`FieldError` + `aria-invalid`) dan fokus ke field pertama
+  yang gagal; toast hanya ringkasan. Halaman edit wajib punya not-found/error state, bukan form kosong.
+- Anggota outlet dipilih dari hasil `GET /api/users/search` (`useSearchUsers`), bukan input `user_id` mentah.
+- Preset capability hanya didefinisikan di `src/lib/capabilities.ts` (`CAPABILITY_PRESETS`); form create dan
+  edit outlet sama-sama memakai preset + Reset.
+- Atomic components: `components/atoms/{Button,Input,Label,Select,FieldError}`; molecules:
+  `{FormField,ConfirmDialog,Toast}` plus `molecules/ui` (`PageHeader`, `Card`, `EmptyState`, `AccessDenied`,
+  `Spinner`, `Table`, `Badge`, `ErrorAlert`).
 - Use the shared fetch mutator (`src/api/mutator/custom-instance.ts`) and typed hooks.
 - Follow existing Tailwind + indigo palette and the compact card/list style.
 - Feature code lives in `src/features/<feature>/`.

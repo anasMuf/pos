@@ -47,6 +47,13 @@ export interface OutletMember {
   updated_at: string;
 }
 
+export interface UserLookup {
+  id: number;
+  full_name: string;
+  username: string;
+  email: string;
+}
+
 export type OutletRole = 'admin' | 'owner' | 'manager' | 'cashier' | 'operator';
 export type CommissionType = 'none' | 'percent' | 'fixed';
 

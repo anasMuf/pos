@@ -5,6 +5,8 @@ import (
 	"api/service"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -13,11 +15,13 @@ import (
 
 type UserHandler struct {
 	userService service.UserService
+	access      *service.AccessService
 }
 
-func NewUserHandler(userService service.UserService) *UserHandler {
+func NewUserHandler(userService service.UserService, access *service.AccessService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
+		access:      access,
 	}
 }
 
@@ -42,6 +46,31 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 		Message: "User retrieved successfully",
 		Data:    user,
 	})
+}
+
+// SearchUsers godoc
+// @Summary      Search users
+// @Description  Search users by name, email or username for outlet member assignment. Requires global admin or at least one manageable outlet.
+// @Tags         users
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        search  query     string  false  "Search term (name, email, username)"
+// @Param        limit   query     int     false  "Maximum number of results (default 20, max 50)"
+// @Success      200     {object}  dto.SuccessResponse{data=[]dto.UserLookupResponse}
+// @Failure      401     {object}  dto.ErrorResponse
+// @Failure      403     {object}  dto.ErrorResponse
+// @Router       /users/search [get]
+func (h *UserHandler) SearchUsers(c echo.Context) error {
+	uid := currentUserID(c)
+	if !h.access.IsGlobalAdmin(uid) && len(h.access.ManageableOutletIDs(uid)) == 0 {
+		return forbidden("")
+	}
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	users, err := h.userService.SearchUsers(strings.TrimSpace(c.QueryParam("search")), limit)
+	if err != nil {
+		return mapError(err)
+	}
+	return respond(c, http.StatusOK, "Users retrieved successfully", users)
 }
 
 // CreateUser godoc

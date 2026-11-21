@@ -33,10 +33,12 @@ import type {
   StockMovement,
   SyncResult,
   Tenant,
+  UserLookup,
 } from './types';
 
 export const queryKeys = {
   tenants: ['tenants'] as const,
+  tenant: (id: number) => ['tenant', id] as const,
   outlets: ['outlets'] as const,
   outlet: (id: number) => ['outlet', id] as const,
   product: (id: number) => ['product', id] as const,
@@ -58,6 +60,34 @@ export const queryKeys = {
 // ---- Tenants ----
 export function useTenants() {
   return useQuery({ queryKey: queryKeys.tenants, queryFn: () => apiGet<Tenant[]>('/tenants') });
+}
+
+export function useTenant(id: number | null) {
+  return useQuery({
+    queryKey: queryKeys.tenant(id ?? 0),
+    queryFn: () => apiGet<Tenant>(`/tenants/${id}`),
+    enabled: !!id,
+  });
+}
+
+export function useUpdateTenant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...payload }: { id: number } & Partial<Tenant>) =>
+      apiPatch<Tenant>(`/tenants/${id}`, payload),
+    onSuccess: (tenant) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenants });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tenant(tenant.id) });
+    },
+  });
+}
+
+export function useDeleteTenant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => apiDelete<null>(`/tenants/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tenants }),
+  });
 }
 
 export function useCreateTenant() {
@@ -179,6 +209,19 @@ export function useOutletMembers(outletId: number | null) {
     queryKey: queryKeys.outletMembers(outletId ?? 0),
     queryFn: () => apiGet<OutletMember[]>(`/outlets/${outletId}/members`),
     enabled: !!outletId,
+  });
+}
+
+export function useSearchUsers(search: string) {
+  return useQuery({
+    queryKey: ['user-search', search],
+    queryFn: () =>
+      apiGet<UserLookup[]>('/users/search', {
+        search: search.trim(),
+        limit: 20,
+      }),
+    enabled: search.trim().length >= 2,
+    staleTime: 60 * 1000,
   });
 }
 

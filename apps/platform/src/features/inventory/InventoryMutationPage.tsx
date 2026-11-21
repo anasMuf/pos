@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
-import { useCreateStockMovement, useProducts } from '../../api/queries';
+import { useCreateStockMovement, useProducts, useVariants } from '../../api/queries';
 import type { MovementType } from '../../api/types';
 import { AccessDenied, Card, PageHeader } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
@@ -10,6 +10,7 @@ import { Input } from '../../components/atoms/Input';
 import { Select } from '../../components/atoms/Select';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 const MANUAL_TYPES: { value: MovementType; label: string }[] = [
   { value: 'stock_in', label: 'Stok Masuk' },
@@ -25,9 +26,21 @@ export function InventoryMutationPage() {
   const createMovement = useCreateStockMovement();
 
   const [productId, setProductId] = useState('');
+  const [variantId, setVariantId] = useState('');
   const [movementType, setMovementType] = useState<MovementType>('stock_in');
   const [qty, setQty] = useState('');
   const [note, setNote] = useState('');
+  const [errors, setErrors] = useState<{ product?: string; qty?: string }>({});
+
+  const selectedProduct = products.find((product) => product.id === Number(productId));
+  const { data: variants = [] } = useVariants(productId ? Number(productId) : null);
+  const selectedVariant = variants.find((variant) => variant.id === Number(variantId));
+  const currentStock = selectedVariant ? selectedVariant.stock_qty : (selectedProduct?.stock_qty ?? 0);
+  const parsedQty = Number(qty) || 0;
+  const delta =
+    movementType === 'stock_out' ? -Math.abs(parsedQty) : movementType === 'adjustment' ? parsedQty : Math.abs(parsedQty);
+  const nextStock = currentStock + delta;
+  const negativeStock = parsedQty !== 0 && nextStock < 0;
 
   if (!canManage) {
     return (
@@ -44,8 +57,17 @@ export function InventoryMutationPage() {
       return;
     }
     const parsedQty = Number(qty);
-    if (!productId || !parsedQty) {
-      addToast({ variant: 'error', title: 'Data belum lengkap', message: 'Pilih produk dan isi jumlah.' });
+    const next: { product?: string; qty?: string } = {};
+    if (!productId) next.product = 'Pilih produk terlebih dahulu.';
+    if (!parsedQty) next.qty = 'Jumlah mutasi wajib diisi.';
+    if (negativeStock) next.qty = 'Stok akhir tidak boleh negatif.';
+    setErrors(next);
+    if (next.product) {
+      document.getElementById('movement-product')?.focus();
+      return;
+    }
+    if (next.qty) {
+      document.getElementById('movement-qty')?.focus();
       return;
     }
     const delta =
@@ -59,6 +81,7 @@ export function InventoryMutationPage() {
       await createMovement.mutateAsync({
         outlet_id: activeOutletId,
         product_id: Number(productId),
+        variant_id: variantId ? Number(variantId) : undefined,
         movement_type: movementType,
         qty_change: delta,
         reference_type: 'manual',
@@ -97,8 +120,14 @@ export function InventoryMutationPage() {
             <Select
               id="movement-product"
               value={productId}
-              onChange={(event) => setProductId(event.target.value)}
+              onChange={(event) => {
+                setProductId(event.target.value);
+                setVariantId('');
+                setErrors({});
+              }}
               className="mt-1"
+              aria-invalid={!!errors.product}
+              aria-describedby={errors.product ? 'movement-product-error' : undefined}
             >
               <option value="">Pilih produk</option>
               {products.map((product) => (
@@ -107,7 +136,26 @@ export function InventoryMutationPage() {
                 </option>
               ))}
             </Select>
+            <FieldError id="movement-product-error" message={errors.product} />
           </div>
+          {variants.length > 0 && (
+            <div>
+              <Label htmlFor="movement-variant">Varian</Label>
+              <Select
+                id="movement-variant"
+                value={variantId}
+                onChange={(event) => setVariantId(event.target.value)}
+                className="mt-1"
+              >
+                <option value="">Tanpa varian (stok utama)</option>
+                {variants.map((variant) => (
+                  <option key={variant.id} value={variant.id}>
+                    {variant.name} · {variant.sku} (stok {variant.stock_qty})
+                  </option>
+                ))}
+              </Select>
+            </div>
+          )}
           <div>
             <Label htmlFor="movement-type">Jenis Mutasi</Label>
             <Select
@@ -131,9 +179,15 @@ export function InventoryMutationPage() {
               id="movement-qty"
               type="number"
               value={qty}
-              onChange={(event) => setQty(event.target.value)}
+              onChange={(event) => {
+                setQty(event.target.value);
+                setErrors({});
+              }}
               className="mt-1"
+              aria-invalid={!!errors.qty}
+              aria-describedby={errors.qty ? 'movement-qty-error' : undefined}
             />
+            <FieldError id="movement-qty-error" message={errors.qty} />
           </div>
           <div>
             <Label htmlFor="movement-note">Catatan</Label>
@@ -146,6 +200,28 @@ export function InventoryMutationPage() {
             />
           </div>
         </div>
+
+        {selectedProduct && (
+          <div className="mt-4 rounded-md bg-gray-50 p-3 text-sm">
+            <p className="text-gray-600">
+              Stok saat ini: <span className="font-semibold text-gray-900">{currentStock}</span>
+              {parsedQty !== 0 && (
+                <>
+                  {' '}
+                  → setelah mutasi:{' '}
+                  <span className={negativeStock ? 'font-semibold text-red-600' : 'font-semibold text-gray-900'}>
+                    {nextStock}
+                  </span>
+                </>
+              )}
+            </p>
+            {negativeStock && (
+              <p role="alert" className="mt-1 text-xs text-red-600">
+                Stok akhir tidak boleh negatif.
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="mt-4 flex gap-2">
           <Button type="button" onClick={handleSubmit} disabled={createMovement.isPending}>

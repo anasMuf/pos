@@ -3,11 +3,12 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useApp } from '../app/AppContext';
 import { useCreateCustomer, useCustomer, useUpdateCustomer } from '../../api/queries';
-import { AccessDenied, Card, PageHeader, Spinner } from '../../components/molecules/ui';
+import { AccessDenied, Card, EmptyState, PageHeader, Spinner } from '../../components/molecules/ui';
 import { Button } from '../../components/atoms/Button';
 import { Input } from '../../components/atoms/Input';
 import { Label } from '../../components/atoms/Label';
 import { useToast } from '../../components/molecules/Toast';
+import { FieldError } from '../../components/atoms/FieldError';
 
 const EMPTY_FORM = { name: '', phone: '', email: '', address: '', note: '' };
 
@@ -15,10 +16,11 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { activeOutletId, activeOutlet, canOperate } = useApp();
-  const { data: customer, isLoading } = useCustomer(customerId ?? null);
+  const { data: customer, isLoading, isError } = useCustomer(customerId ?? null);
   const createCustomer = useCreateCustomer();
   const updateCustomer = useUpdateCustomer();
   const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState<{ name?: string }>({});
 
   useEffect(() => {
     if (!customer) return;
@@ -41,12 +43,30 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
   }
 
   if (customerId && isLoading) return <Spinner />;
+  if (customerId && (isError || !customer)) {
+    return (
+      <div>
+        <PageHeader title="Edit Pelanggan" />
+        <EmptyState
+          title="Pelanggan tidak ditemukan"
+          description="Pelanggan tidak tersedia atau sudah dihapus."
+          action={
+            <Link to="/customers" className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white">
+              Kembali ke Pelanggan
+            </Link>
+          }
+        />
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     if (!form.name.trim()) {
-      addToast({ variant: 'error', title: 'Nama wajib diisi', message: 'Masukkan nama pelanggan.' });
+      setErrors({ name: 'Nama pelanggan wajib diisi.' });
+      document.getElementById('customer-name')?.focus();
       return;
     }
+    setErrors({});
     if (!customerId && !activeOutletId) {
       addToast({ variant: 'error', title: 'Outlet belum dipilih', message: 'Pilih outlet terlebih dahulu.' });
       return;
@@ -93,9 +113,15 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
             <Input
               id="customer-name"
               value={form.name}
-              onChange={(event) => setForm({ ...form, name: event.target.value })}
+              onChange={(event) => {
+                setForm({ ...form, name: event.target.value });
+                setErrors({});
+              }}
               className="mt-1"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'customer-name-error' : undefined}
             />
+            <FieldError id="customer-name-error" message={errors.name} />
           </div>
           <div>
             <Label htmlFor="customer-phone">Telepon</Label>
