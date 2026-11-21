@@ -11,6 +11,11 @@ import { useToast } from '../../components/molecules/Toast';
 import { FieldError } from '../../components/atoms/FieldError';
 import { formatCurrency, formatDateTime } from '../../lib/format';
 
+function differenceLabel(difference: number): string {
+  if (Math.abs(difference) < 0.005) return 'Pas';
+  return difference > 0 ? 'Lebih' : 'Kurang';
+}
+
 export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -19,6 +24,11 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
   const closeMutation = useCloseShift();
   const [closingCash, setClosingCash] = useState('');
   const [error, setError] = useState('');
+
+  const parsedCash = closingCash.trim() === '' ? Number.NaN : Number(closingCash);
+  const physicalCash = Number.isFinite(parsedCash) ? parsedCash : null;
+  const difference =
+    physicalCash === null || !shift ? null : physicalCash - shift.expected_cash;
 
   if (!canOperate) {
     return (
@@ -115,6 +125,29 @@ export function ShiftClosePage({ shiftId }: { shiftId: number }) {
               />
               <FieldError id="closing-cash-error" message={error} />
             </div>
+            <dl className="rounded-md bg-gray-50 px-3 py-2 text-sm" aria-live="polite">
+              <div className="flex justify-between py-1">
+                <dt className="text-gray-500">Kas fisik dihitung</dt>
+                <dd className="font-medium text-gray-900">
+                  {physicalCash === null ? '—' : formatCurrency(physicalCash)}
+                </dd>
+              </div>
+              <div className="flex justify-between py-1">
+                <dt className="text-gray-500">Selisih (fisik − sistem)</dt>
+                <dd className="font-medium text-gray-900">
+                  {difference === null ? (
+                    '—'
+                  ) : (
+                    <span>
+                      {formatCurrency(difference)}{' '}
+                      <span className="text-xs font-semibold text-gray-500">
+                        ({differenceLabel(difference)})
+                      </span>
+                    </span>
+                  )}
+                </dd>
+              </div>
+            </dl>
             <div className="flex gap-2">
               <Button type="button" onClick={handleSubmit} disabled={closeMutation.isPending}>
                 {closeMutation.isPending ? 'Menutup...' : 'Tutup Shift'}
