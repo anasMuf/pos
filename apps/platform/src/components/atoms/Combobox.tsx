@@ -56,7 +56,7 @@ export function Combobox({
   disabled,
   className = '',
   size = 'md',
-  searchPlaceholder = 'Cari…',
+  searchPlaceholder = 'Tulis pencarian ...',
   emptyLabel = 'Tidak ada hasil',
   'aria-label': ariaLabel,
   'aria-invalid': ariaInvalid,

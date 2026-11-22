@@ -104,7 +104,7 @@ export function OrdersPage() {
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Cari nomor pesanan / pelanggan"
+          placeholder="Tulis nomor pesanan atau nama pelanggan ..."
         />
         {workflowEnabled && (
           <Select

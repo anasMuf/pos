@@ -330,7 +330,7 @@ export function PosPage() {
               ref={searchRef}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Cari produk, SKU, atau kategori..."
+              placeholder="Tulis nama produk atau SKU ..."
               className="pl-9"
             />
             <p className="mt-1 text-xs text-gray-400">
@@ -475,7 +475,7 @@ export function PosPage() {
                   value={customerName}
                   onChange={(event) => setCustomerName(event.target.value)}
                   disabled={!!customerId}
-                  placeholder={customerId ? 'Mengikuti pelanggan terdaftar' : 'Nama cepat untuk walk-in'}
+                  placeholder="Tulis nama pelanggan ..."
                   className="mt-1"
                 />
                 <p className="mt-1 text-xs text-gray-500">
@@ -850,7 +850,7 @@ function ItemConfigurator({
               id="item-note"
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Tulis permintaan khusus, mis. tanpa gula / jahit rapat"
+              placeholder="Tulis catatan item ..."
               maxLength={200}
               className="mt-1"
             />

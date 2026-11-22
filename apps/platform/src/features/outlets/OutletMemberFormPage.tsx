@@ -98,7 +98,7 @@ export function OutletMemberFormPage({ outletId }: { outletId: number }) {
                 setSelectedUser(null);
                 setError('');
               }}
-              placeholder="Nama, email, atau username (min. 2 karakter)"
+              placeholder="Tulis nama, email, atau username ..."
               className="mt-1"
               aria-invalid={!!error}
               aria-describedby={error ? 'member-search-error' : undefined}

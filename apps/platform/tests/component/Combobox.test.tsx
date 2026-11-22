@@ -60,7 +60,7 @@ describe('Combobox', () => {
     render(<ControlledCombobox searchable />);
     fireEvent.click(screen.getByRole('combobox', { name: 'Buah' }));
 
-    fireEvent.change(screen.getByLabelText('Cari…'), { target: { value: 'cer' } });
+    fireEvent.change(screen.getByLabelText('Tulis pencarian ...'), { target: { value: 'cer' } });
     expect(screen.getByRole('option', { name: 'Ceri' })).toBeTruthy();
     expect(screen.queryByRole('option', { name: 'Apel' })).toBeNull();
   });
@@ -69,7 +69,7 @@ describe('Combobox', () => {
     render(<ControlledCombobox searchable />);
     fireEvent.click(screen.getByRole('combobox', { name: 'Buah' }));
 
-    fireEvent.change(screen.getByLabelText('Cari…'), { target: { value: 'zzz' } });
+    fireEvent.change(screen.getByLabelText('Tulis pencarian ...'), { target: { value: 'zzz' } });
     expect(screen.getByText('Tidak ada hasil')).toBeTruthy();
   });
 

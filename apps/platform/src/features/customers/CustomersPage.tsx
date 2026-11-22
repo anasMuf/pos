@@ -86,7 +86,7 @@ export function CustomersPage() {
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Cari nama, telepon, atau email"
+          placeholder="Tulis nama, telepon, atau email ..."
           aria-label="Cari pelanggan"
         />
       </div>
