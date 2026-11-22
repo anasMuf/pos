@@ -166,7 +166,7 @@ export function CustomerFormPage({ customerId }: { customerId?: number }) {
               value={form.note}
               onChange={(event) => setForm({ ...form, note: event.target.value })}
               className="mt-1"
-              placeholder="Preferensi, catatan produksi, dll."
+              placeholder="Tulis catatan pelanggan ..."
             />
           </div>
         </div>

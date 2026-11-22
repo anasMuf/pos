@@ -199,7 +199,7 @@ export function InventoryMutationPage({
               id="movement-note"
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Opsional"
+              placeholder="Tulis catatan mutasi ..."
               className="mt-1"
             />
           </div>

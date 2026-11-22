@@ -330,7 +330,7 @@ export function PosPage() {
               ref={searchRef}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Cari produk, SKU, atau kategori..."
+              placeholder="Tulis nama produk atau SKU ..."
               className="pl-9"
             />
             <p className="mt-1 text-xs text-gray-400">
@@ -450,7 +450,12 @@ export function PosPage() {
                 <Select
                   id="customer-select"
                   value={customerId}
-                  onChange={(event) => setCustomerId(event.target.value)}
+                  onChange={(event) => {
+                    const nextId = event.target.value;
+                    setCustomerId(nextId);
+                    const picked = customers.find((customer) => String(customer.id) === nextId);
+                    setCustomerName(picked?.name ?? '');
+                  }}
                   className="mt-1"
                 >
                   <option value="">Walk-in / tanpa pelanggan</option>
@@ -464,14 +469,20 @@ export function PosPage() {
               </div>
 
               <div>
-                <Label htmlFor="customer">Nama Pelanggan (opsional)</Label>
+                <Label htmlFor="customer">Nama Pelanggan</Label>
                 <Input
                   id="customer"
                   value={customerName}
                   onChange={(event) => setCustomerName(event.target.value)}
-                  placeholder="Nama cepat untuk walk-in"
+                  disabled={!!customerId}
+                  placeholder="Tulis nama pelanggan ..."
                   className="mt-1"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  {customerId
+                    ? 'Nama diambil dari pelanggan terdaftar agar riwayat pesanan tetap terhubung.'
+                    : 'Isi nama jika pelanggan belum terdaftar.'}
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-2 border-t border-gray-100 pt-3">
@@ -483,7 +494,7 @@ export function PosPage() {
                     onChange={setDiscountPercent}
                     min={0}
                     max={100}
-                    decimals={2}
+                    decimals={0}
                     showStepper
                     className="mt-1"
                   />
@@ -505,7 +516,7 @@ export function PosPage() {
                     onChange={setTaxPercent}
                     min={0}
                     max={100}
-                    decimals={2}
+                    decimals={0}
                     showStepper
                     className="mt-1"
                   />
@@ -650,6 +661,36 @@ export function PosPage() {
   );
 }
 
+function VariantChip({
+  label,
+  hint,
+  selected,
+  onClick,
+}: {
+  label: string;
+  hint?: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold ring-1 ring-inset transition-colors ${
+        selected
+          ? 'bg-indigo-600 text-white ring-indigo-600'
+          : 'bg-white text-gray-700 ring-gray-300 hover:bg-gray-50'
+      }`}
+    >
+      {label}
+      {hint && (
+        <span className={selected ? 'text-indigo-100' : 'text-gray-500'}>{hint}</span>
+      )}
+    </button>
+  );
+}
+
 function ItemConfigurator({
   product,
   enableVariants,
@@ -668,7 +709,7 @@ function ItemConfigurator({
   onAdd: (item: CartItem) => void;
 }) {
   const { data: variants = [] } = useVariants(enableVariants ? product.id : null);
-  const [variantId, setVariantId] = useState<number | undefined>(variants[0]?.id);
+  const [variantId, setVariantId] = useState<number | undefined>(undefined);
   const [qty, setQty] = useState(1);
   const [selectedModifiers, setSelectedModifiers] = useState<string[]>([]);
   const [width, setWidth] = useState('');
@@ -720,22 +761,25 @@ function ItemConfigurator({
 
         <div className="mt-4 space-y-3">
           {enableVariants && variants.length > 0 && (
-            <div>
-              <Label htmlFor="variant">Varian</Label>
-              <Select
-                id="variant"
-                value={variantId ?? ''}
-                onChange={(event) => setVariantId(event.target.value ? Number(event.target.value) : undefined)}
-                className="mt-1"
-              >
-                <option value="">Tanpa varian</option>
+            <fieldset>
+              <legend className="text-sm font-medium text-gray-900">Varian</legend>
+              <div className="mt-1 flex flex-wrap gap-2">
+                <VariantChip
+                  label="Tanpa varian"
+                  selected={variantId === undefined}
+                  onClick={() => setVariantId(undefined)}
+                />
                 {variants.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} {item.price_override > 0 ? `(+${formatCurrency(item.price_override)})` : ''}
-                  </option>
+                  <VariantChip
+                    key={item.id}
+                    label={item.name}
+                    hint={item.price_override > 0 ? `+${formatCurrency(item.price_override)}` : undefined}
+                    selected={variantId === item.id}
+                    onClick={() => setVariantId(item.id)}
+                  />
                 ))}
-              </Select>
-            </div>
+              </div>
+            </fieldset>
           )}
 
           {dimensionActive && (
@@ -806,7 +850,7 @@ function ItemConfigurator({
               id="item-note"
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Contoh: tanpa gula, warna hitam"
+              placeholder="Tulis catatan item ..."
               maxLength={200}
               className="mt-1"
             />

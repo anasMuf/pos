@@ -120,7 +120,7 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
               value={form.header}
               onChange={(event) => setForm({ ...form, header: event.target.value })}
               className="mt-1"
-              placeholder="Nama toko / outlet"
+              placeholder="Tulis nama toko ..."
             />
           </div>
           <div>
@@ -130,7 +130,7 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
               value={form.footer}
               onChange={(event) => setForm({ ...form, footer: event.target.value })}
               className="mt-1"
-              placeholder="Terima kasih"
+              placeholder="Tulis ucapan penutup ..."
             />
           </div>
           <div>
@@ -155,7 +155,7 @@ export function ReceiptSettingsPage({ outletId }: { outletId: number }) {
               value={form.tax_label}
               onChange={(event) => setForm({ ...form, tax_label: event.target.value })}
               className="mt-1"
-              placeholder="NPWP"
+              placeholder="Tulis NPWP ..."
             />
           </div>
           <div>

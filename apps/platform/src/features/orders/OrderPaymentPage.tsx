@@ -179,7 +179,7 @@ export function OrderPaymentPage({ orderId }: { orderId: number }) {
                 id="payment-note"
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
-                placeholder="Opsional"
+                placeholder="Tulis catatan pembayaran ..."
                 className="mt-1"
               />
             </div>

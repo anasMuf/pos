@@ -419,7 +419,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                   value={form.dimension_unit}
                   onChange={(event) => setField('dimension_unit', event.target.value)}
                   className="mt-1"
-                  placeholder="m"
+                  placeholder="Tulis satuan ..."
                 />
               </div>
               <div>
@@ -573,7 +573,7 @@ export function ProductFormPage({ productId }: { productId?: number }) {
                         )
                       }
                       className="mt-1"
-                      placeholder="Mata Ayam"
+                      placeholder="Tulis nama tambahan ..."
                     />
                   </div>
                   <div>

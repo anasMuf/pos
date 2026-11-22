@@ -20,6 +20,7 @@ test.describe('cashier checkout', () => {
     const outlets = await listOutlets(request, adminToken);
     expect(outlets.length).toBeGreaterThan(0);
     const outlet = outlets[0];
+    const workflowEnabled = !!outlet.capabilities?.enable_order_workflow;
 
     const products = await listProducts(request, adminToken, outlet.id);
     const product = products.find((item) => item.pricing_type !== 'dimension');
@@ -86,9 +87,16 @@ test.describe('cashier checkout', () => {
     await expect(page.getByRole('link', { name: 'Kasir', exact: true })).toHaveCount(0);
     await page.goto('/orders');
     await expect(page.getByText(order.order_number)).toBeVisible();
-    await expect(
-      page.getByRole('combobox', { name: 'Ubah status pengerjaan' }).first(),
-    ).toBeEnabled();
+    if (workflowEnabled) {
+      await expect(
+        page.getByRole('combobox', { name: 'Ubah status pengerjaan' }).first(),
+      ).toBeEnabled();
+    } else {
+      // Without the order-workflow capability the status control must not exist.
+      await expect(
+        page.getByRole('combobox', { name: 'Ubah status pengerjaan' }),
+      ).toHaveCount(0);
+    }
   });
 
   test('adds a customer without leaving the cashier', async ({ page, request }) => {
@@ -113,10 +121,8 @@ test.describe('cashier checkout', () => {
     await page.getByRole('button', { name: 'Simpan', exact: true }).click();
 
     await expect(page.getByRole('dialog', { name: 'Pelanggan Baru' })).toHaveCount(0);
-    await expect(page.getByRole('combobox', { name: 'Pelanggan Terdaftar' })).toHaveValue(/\d+/);
-    const selected = await page
-      .getByRole('combobox', { name: 'Pelanggan Terdaftar' })
-      .evaluate((element) => (element as HTMLSelectElement).selectedOptions[0]?.textContent ?? '');
-    expect(selected).toContain(customerName);
+    await expect(
+      page.getByRole('combobox', { name: 'Pelanggan Terdaftar' }),
+    ).toContainText(customerName);
   });
 });

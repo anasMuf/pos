@@ -109,7 +109,7 @@ export function NewOutletPage() {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 className="mt-1"
-                placeholder="Outlet Sudirman"
+                placeholder="Tulis nama outlet ..."
               />
             </div>
             <div>
@@ -119,7 +119,7 @@ export function NewOutletPage() {
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
                 className="mt-1"
-                placeholder="Jl. Sudirman No. 45"
+                placeholder="Tulis alamat outlet ..."
               />
             </div>
             <div>
